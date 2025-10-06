@@ -26,7 +26,8 @@ class LokasiAssetController extends Controller
      */
     public function index()
     {
-        return LokasiAsset::with('pic')->paginate(15);
+        return LokasiAsset::join('employees', 'employees.id', 'lokasi_assets.pic_id')
+                ->select('lokasi_assets.*', 'employees.name as pic_name')->get();
     }
 
     /**

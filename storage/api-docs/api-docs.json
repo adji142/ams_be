@@ -461,6 +461,24 @@
                 ],
                 "summary": "List employees",
                 "operationId": "b9b73e1873c5fe36b951f014f711e4fa",
+                "parameters": [
+                    {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter by department ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Search by name, NIK, or email",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -684,6 +702,182 @@
                 ]
             }
         },
+        "/api/grupasset": {
+            "get": {
+                "tags": [
+                    "Grup Asset"
+                ],
+                "summary": "Get list of Grup Asset",
+                "operationId": "f8e07ad4c0fa71f88647efc500cf2df2",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/GrupAsset"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Grup Asset"
+                ],
+                "summary": "Create a new Grup Asset",
+                "operationId": "21aea6155248b400d743d38fda5a6f9a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "kode_Grup": {
+                                        "type": "string",
+                                        "example": "GRP001"
+                                    },
+                                    "nama_Grup": {
+                                        "type": "string",
+                                        "example": "Gudang Utama"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "GrupAsset created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GrupAsset"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/grupasset/{id}": {
+            "get": {
+                "tags": [
+                    "Grup Asset"
+                ],
+                "summary": "Get Grup Asset detail",
+                "operationId": "fd22f012b13a3b49f54d3c504f1c3bf3",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GrupAsset"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Grup Asset not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Grup Asset"
+                ],
+                "summary": "Update a Grup Asset",
+                "operationId": "27f845636fefca2d29d462b3f22ba637",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "kode_Grup",
+                                    "nama_Grup"
+                                ],
+                                "properties": {
+                                    "kode_Grup": {
+                                        "type": "string",
+                                        "example": "GRP001"
+                                    },
+                                    "nama_Grup": {
+                                        "type": "string",
+                                        "example": "Gudang Utama"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Grup Asset updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GrupAsset"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Grup Asset not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/lokasi-assets": {
             "get": {
                 "tags": [
@@ -881,6 +1075,323 @@
                     },
                     "404": {
                         "description": "Lokasi not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master-assets": {
+            "get": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "List all master assets",
+                "operationId": "39c43e461c9d41dd80a532add4f33345",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MasterAsset"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Create new master asset",
+                "operationId": "04d0294000791825ca4335242c6de971",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "KodeAsset",
+                                    "NamaAsset",
+                                    "TglBeli",
+                                    "Jumlah"
+                                ],
+                                "properties": {
+                                    "KodeAsset": {
+                                        "type": "string",
+                                        "example": "AST-001"
+                                    },
+                                    "NamaAsset": {
+                                        "type": "string",
+                                        "example": "Laptop Dell Latitude"
+                                    },
+                                    "TglBeli": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-10-01"
+                                    },
+                                    "TglKapitalisasi": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-10-15"
+                                    },
+                                    "UmurPakai": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "Keterangan": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "Jumlah": {
+                                        "type": "number",
+                                        "format": "double",
+                                        "example": 15000000
+                                    },
+                                    "PIC": {
+                                        "description": "Employee ID as PIC",
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "MasterAsset created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MasterAsset"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master-assets/{id}": {
+            "get": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Get master asset detail",
+                "operationId": "1b6f627bcea3629e4270be9a3b862d4b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MasterAsset"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Asset not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Update master asset",
+                "operationId": "9fd9cbbdb060924de7f21e86776153ef",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MasterAsset"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "MasterAsset updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MasterAsset"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Asset not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Delete master asset",
+                "operationId": "68a52ba04ec24b640c2192f91044f372",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "MasterAsset deleted"
+                    },
+                    "404": {
+                        "description": "Asset not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master-assets/{id}/images": {
+            "post": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Upload image(s) for a Master Asset",
+                "operationId": "a46cc0a1dc5522ba6dbd35620220907c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "images[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Images uploaded successfully"
+                    },
+                    "404": {
+                        "description": "Asset not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master-assets/{asset_id}/images/{image_id}": {
+            "delete": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Delete an asset image",
+                "operationId": "b95d51a27885630bbc094a9cd479c761",
+                "parameters": [
+                    {
+                        "name": "asset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "image_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image deleted"
+                    },
+                    "404": {
+                        "description": "Image not found"
                     }
                 },
                 "security": [
@@ -1549,6 +2060,13 @@
                                     "label": {
                                         "type": "string",
                                         "example": "Editor"
+                                    },
+                                    "permission_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -1710,6 +2228,13 @@
                                     "label": {
                                         "type": "string",
                                         "example": "Editor"
+                                    },
+                                    "permission_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -2649,6 +3174,36 @@
                 },
                 "type": "object"
             },
+            "GrupAsset": {
+                "title": "Grup Asset",
+                "required": [
+                    "kode_Grup",
+                    "nama_Grup"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "kode_Grup": {
+                        "type": "string",
+                        "example": "GRP001"
+                    },
+                    "nama_Grup": {
+                        "type": "string",
+                        "example": "Gudang Utama"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "LokasiAsset": {
                 "title": "Lokasi Asset",
                 "required": [
@@ -2680,6 +3235,99 @@
                     "asset_count": {
                         "type": "integer",
                         "example": 120
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "MasterAsset": {
+                "title": "MasterAsset",
+                "description": "Data master aset perusahaan",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KodeAsset": {
+                        "type": "string",
+                        "example": "AST-001"
+                    },
+                    "NamaAsset": {
+                        "type": "string",
+                        "example": "Laptop Dell Latitude"
+                    },
+                    "TglBeli": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-10-01"
+                    },
+                    "TglKapitalisasi": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-10-15"
+                    },
+                    "UmurPakai": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "Keterangan": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "Jumlah": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 15000000
+                    },
+                    "PIC": {
+                        "description": "Employee ID as PIC",
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "employee": {
+                        "$ref": "#/components/schemas/Employee"
+                    },
+                    "GrupAssetID": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "grup_asset": {
+                        "$ref": "#/components/schemas/GrupAsset"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-10-06T12:34:56Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-10-06T12:34:56Z"
+                    }
+                },
+                "type": "object"
+            },
+            "MasterAssetImage": {
+                "title": "MasterAssetImage",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "master_asset_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "uploads/assets/AST-001/image1.jpg"
                     },
                     "created_at": {
                         "type": "string",
@@ -2751,6 +3399,10 @@
             "description": "API for managing asset locations"
         },
         {
+            "name": "MasterAssets",
+            "description": "API for managing master assets"
+        },
+        {
             "name": "Menu",
             "description": "Menu management"
         },
@@ -2773,6 +3425,10 @@
         {
             "name": "Departments",
             "description": "Departments"
+        },
+        {
+            "name": "Grup Asset",
+            "description": "Grup Asset"
         },
         {
             "name": "Menus",

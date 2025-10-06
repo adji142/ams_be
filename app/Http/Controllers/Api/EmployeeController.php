@@ -19,6 +19,18 @@ class EmployeeController extends Controller
      *     summary="List employees",
      *     tags={"Employees"},
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="department_id",
+     *         in="query",
+     *         description="Filter by department ID",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by name, NIK, or email",
+     *         @OA\Schema(type="string")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -26,9 +38,25 @@ class EmployeeController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Employee::with('department')->paginate(15);
+        $query = Employee::join('departments', 'employees.department_id', '=', 'departments.id')
+            ->select('employees.*', 'departments.name as department_name');
+
+        if ($request->filled('department_id')) {
+            $query->where('employees.department_id', $request->department_id);
+        }
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('employees.name', 'like', "%{$searchTerm}%")
+                  ->orWhere('employees.nik', 'like', "%{$searchTerm}%")
+                  ->orWhere('employees.email', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        return $query->get();
     }
 
     /**

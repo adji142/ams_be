@@ -32,4 +32,8 @@ class Employee extends Model
     {
         return $this->belongsTo(Department::class);
     }
+    public function assets()
+    {
+        return $this->hasMany(MasterAsset::class, 'PIC');
+    }
 }

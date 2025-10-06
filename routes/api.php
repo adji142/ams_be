@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\LokasiAssetController;
+use App\Http\Controllers\Api\GrupAssetController;
+use App\Http\Controllers\Api\MasterAssetController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -40,6 +42,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Employee
     Route::apiResource('employees', EmployeeController::class);
 
+    // Grup Asset
+    Route::apiResource('grup-assets', GrupAssetController::class);
     // Lokasi Asset
     Route::apiResource('lokasi-assets', LokasiAssetController::class);
+
+    // Master Asset
+    Route::apiResource('master-assets', MasterAssetController::class);
+    Route::post('master-assets/{id}/images', [MasterAssetController::class, 'uploadImages']);
+    Route::delete('master-assets/{asset_id}/images/{image_id}', [MasterAssetController::class, 'deleteImage']);
 });
