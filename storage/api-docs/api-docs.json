@@ -1270,7 +1270,7 @@
                         }
                     },
                     "404": {
-                        "description": "Asset not found"
+                        "description": "MasterAsset not found"
                     }
                 },
                 "security": [
@@ -1648,6 +1648,232 @@
                     },
                     "404": {
                         "description": "Menu not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permintaan-assets": {
+            "get": {
+                "tags": [
+                    "PermintaanAsset"
+                ],
+                "summary": "List semua permintaan asset",
+                "operationId": "26b37094ceea1d01fbb9743892df2646",
+                "responses": {
+                    "200": {
+                        "description": "Daftar permintaan asset",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PermintaanAssetHeader"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "PermintaanAsset"
+                ],
+                "summary": "Buat transaksi permintaan asset baru",
+                "operationId": "06c3aa7ee0d47cc34508259853d2971c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "TglTransaksi",
+                                    "Requester"
+                                ],
+                                "properties": {
+                                    "TglTransaksi": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-08"
+                                    },
+                                    "Requester": {
+                                        "type": "string",
+                                        "example": "Budi Santoso"
+                                    },
+                                    "Keterangan": {
+                                        "type": "string",
+                                        "example": "Permintaan laptop dan printer"
+                                    },
+                                    "details": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "KodeAsset",
+                                                "NamaAsset",
+                                                "Qty",
+                                                "EstimasiHarga"
+                                            ],
+                                            "properties": {
+                                                "KodeAsset": {
+                                                    "type": "string",
+                                                    "example": "AST-001"
+                                                },
+                                                "NamaAsset": {
+                                                    "type": "string",
+                                                    "example": "Laptop Lenovo Thinkpad"
+                                                },
+                                                "Qty": {
+                                                    "type": "number",
+                                                    "example": 2
+                                                },
+                                                "EstimasiHarga": {
+                                                    "type": "number",
+                                                    "example": 12000000
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Transaksi berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermintaanAssetHeader"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permintaan-assets/{id}": {
+            "get": {
+                "tags": [
+                    "PermintaanAsset"
+                ],
+                "summary": "Ambil detail transaksi permintaan asset",
+                "operationId": "a3cfaaafceec1906c8d6448887a219e0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermintaanAssetHeader"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "PermintaanAsset"
+                ],
+                "summary": "Update transaksi permintaan asset",
+                "operationId": "05ca2a3ecdde54363098a4e01d87018a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermintaanAssetHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Transaksi berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermintaanAssetHeader"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "PermintaanAsset"
+                ],
+                "summary": "Hapus transaksi permintaan asset",
+                "operationId": "7e5bcf1d69076f0dff8357d81553d53a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil dihapus"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
                     }
                 },
                 "security": [
@@ -3386,6 +3612,86 @@
                     }
                 },
                 "type": "object"
+            },
+            "PermintaanAssetDetail": {
+                "title": "Permintaan Asset Detail",
+                "description": "Detail transaksi permintaan asset",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "PA-20251008-0001"
+                    },
+                    "NoUrut": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KodeAsset": {
+                        "type": "string",
+                        "example": "AST-001"
+                    },
+                    "NamaAsset": {
+                        "type": "string",
+                        "example": "Laptop Lenovo Thinkpad"
+                    },
+                    "Qty": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 2
+                    },
+                    "EstimasiHarga": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 12000000
+                    },
+                    "QtySerahTerima": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 0
+                    }
+                },
+                "type": "object"
+            },
+            "PermintaanAssetHeader": {
+                "title": "Permintaan Asset Header",
+                "description": "Header transaksi permintaan asset",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "PA-20251008-0001"
+                    },
+                    "TglTransaksi": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-10-08"
+                    },
+                    "Requester": {
+                        "type": "string",
+                        "example": "Budi Santoso"
+                    },
+                    "Keterangan": {
+                        "type": "string",
+                        "example": "Permintaan laptop dan printer"
+                    },
+                    "DocStatus": {
+                        "type": "string",
+                        "example": "Open"
+                    },
+                    "details": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PermintaanAssetDetail"
+                        }
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -3405,6 +3711,10 @@
         {
             "name": "Menu",
             "description": "Menu management"
+        },
+        {
+            "name": "PermintaanAsset",
+            "description": "API untuk transaksi permintaan asset"
         },
         {
             "name": "Permissions",

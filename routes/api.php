@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\LokasiAssetController;
 use App\Http\Controllers\Api\GrupAssetController;
 use App\Http\Controllers\Api\MasterAssetController;
+use App\Http\Controllers\Api\PermintaanAssetController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -51,4 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('master-assets', MasterAssetController::class);
     Route::post('master-assets/{id}/images', [MasterAssetController::class, 'uploadImages']);
     Route::delete('master-assets/{asset_id}/images/{image_id}', [MasterAssetController::class, 'deleteImage']);
+
+    // Permintaan Asset
+    Route::apiResource('permintaan-assets', PermintaanAssetController::class);
 });
