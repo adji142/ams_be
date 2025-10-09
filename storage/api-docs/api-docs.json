@@ -1401,6 +1401,186 @@
                 ]
             }
         },
+        "/api/master-assets/{asset_id}/stock/{location_id}": {
+            "get": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Get stock of a master asset at a specific location",
+                "operationId": "b2adbfe6386a358ccc37951d91778787",
+                "parameters": [
+                    {
+                        "name": "asset_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "location_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "stock": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Asset not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/master-status-assets": {
+            "get": {
+                "tags": [
+                    "MasterStatusAsset"
+                ],
+                "summary": "Ambil semua status asset",
+                "operationId": "66cee0653a3d3c251cabe25417178185",
+                "responses": {
+                    "200": {
+                        "description": "Sukses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MasterStatusAsset"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "MasterStatusAsset"
+                ],
+                "summary": "Tambah status asset",
+                "operationId": "78cf1fc4ddb398efd3ce674fa47e14b1",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "NamaStatusAsset"
+                                ],
+                                "properties": {
+                                    "NamaStatusAsset": {
+                                        "type": "string",
+                                        "example": "Rusak"
+                                    },
+                                    "isDefault": {
+                                        "type": "boolean",
+                                        "example": false
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Berhasil menambahkan data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MasterStatusAsset"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/master-status-assets/{id}": {
+            "put": {
+                "tags": [
+                    "MasterStatusAsset"
+                ],
+                "summary": "Update status asset",
+                "operationId": "013239a65aaf520935c90fddcb29734a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MasterStatusAsset"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sukses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MasterStatusAsset"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "MasterStatusAsset"
+                ],
+                "summary": "Hapus status asset",
+                "operationId": "ae956723890e9ed1d6dcd4d7174ed3a2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Berhasil dihapus"
+                    }
+                }
+            }
+        },
         "/api/menus": {
             "get": {
                 "tags": [
@@ -1881,6 +2061,239 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/permintaan-assets-bytrx/{noTransaksi}": {
+            "get": {
+                "tags": [
+                    "PermintaanAsset"
+                ],
+                "summary": "Ambil detail transaksi permintaan asset Berdasarkan NoTransaksi",
+                "operationId": "0e3100a5e73b28f3c7afef1616acacd0",
+                "parameters": [
+                    {
+                        "name": "noTransaksi",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermintaanAssetHeader"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/permintaan-scrap": {
+            "get": {
+                "tags": [
+                    "PermintaanScrap"
+                ],
+                "summary": "Ambil semua permintaan scrap (dengan filter optional tglawal, tglakhir, status)",
+                "operationId": "e0b34d8f30b40257230604c88fec17ba",
+                "parameters": [
+                    {
+                        "name": "tglawal",
+                        "in": "query",
+                        "description": "Tanggal awal filter",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "tglakhir",
+                        "in": "query",
+                        "description": "Tanggal akhir filter",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter status dokumen (open/close/batal)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PermintaanScrapHeader"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "PermintaanScrap"
+                ],
+                "summary": "Tambah permintaan scrap baru",
+                "operationId": "0b85a711e351ebf0f5093a1dcf396065",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermintaanScrapHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sukses"
+                    }
+                }
+            }
+        },
+        "/api/permintaan-scrap/{id}": {
+            "get": {
+                "tags": [
+                    "PermintaanScrap"
+                ],
+                "summary": "Ambil detail permintaan scrap berdasarkan ID",
+                "operationId": "4e9bf20100ee9bdeba0590eb93638e71",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PermintaanScrapHeader"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "PermintaanScrap"
+                ],
+                "summary": "Update permintaan scrap",
+                "operationId": "8255eafe486694ee1c6402254c1bafbc",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermintaanScrapHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sukses"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "PermintaanScrap"
+                ],
+                "summary": "Hapus permintaan scrap (soft delete)",
+                "operationId": "b641ca1dbbc5331e19ff844868a9658b",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil dihapus"
+                    }
+                }
+            }
+        },
+        "/api/permintaan-scrap/{id}/approval": {
+            "patch": {
+                "tags": [
+                    "Permintaan Scrap"
+                ],
+                "summary": "Approve atau Reject Permintaan Scrap",
+                "operationId": "b810c599d0bf6e13458ae8b37100b9cf",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "Approval": {
+                                        "type": "integer",
+                                        "enum": [
+                                            1,
+                                            9
+                                        ]
+                                    },
+                                    "KeteranganApproval": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status approval diperbarui"
+                    }
+                }
             }
         },
         "/api/permissions": {
@@ -2785,6 +3198,257 @@
                 ]
             }
         },
+        "/api/serah-terima": {
+            "get": {
+                "tags": [
+                    "SerahTerima"
+                ],
+                "summary": "List serah terima",
+                "operationId": "c6e7813950568b6a4d5fc877778c6c38",
+                "parameters": [
+                    {
+                        "name": "tgl_awal",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "tgl_akhir",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List serah terima",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SerahTerimaHeader"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "SerahTerima"
+                ],
+                "summary": "Buat serah terima baru",
+                "operationId": "d7ea0cb2f8f272e3c2462ef2ec240fb2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "TglSerahTerima",
+                                    "NomorPermintaan",
+                                    "PenerimaID",
+                                    "details"
+                                ],
+                                "properties": {
+                                    "TglSerahTerima": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-09"
+                                    },
+                                    "NomorPermintaan": {
+                                        "type": "string",
+                                        "example": "PA-20251008-0001"
+                                    },
+                                    "PenerimaID": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "Keterangan": {
+                                        "type": "string",
+                                        "example": "Serah terima parsial"
+                                    },
+                                    "details": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "NoUrutPermintaan",
+                                                "KodeAsset",
+                                                "NamaAsset",
+                                                "QtyDiterima"
+                                            ],
+                                            "properties": {
+                                                "NoUrutPermintaan": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "KodeAsset": {
+                                                    "type": "string",
+                                                    "example": "AST-001"
+                                                },
+                                                "NamaAsset": {
+                                                    "type": "string",
+                                                    "example": "Laptop X"
+                                                },
+                                                "QtyDiterima": {
+                                                    "type": "number",
+                                                    "format": "double",
+                                                    "example": 2
+                                                },
+                                                "EstimasiHarga": {
+                                                    "type": "number",
+                                                    "format": "double",
+                                                    "example": 15000000
+                                                },
+                                                "Keterangan": {
+                                                    "type": "string",
+                                                    "example": "Good condition"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Serah terima dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SerahTerimaHeader"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/api/serah-terima/{id}": {
+            "get": {
+                "tags": [
+                    "SerahTerima"
+                ],
+                "summary": "Show serah terima detail",
+                "operationId": "9ca5d45b0ca6410853b5aec7eaafa244",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SerahTerimaHeader"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "SerahTerima"
+                ],
+                "summary": "Update serah terima",
+                "operationId": "d603ed8cfd28203d0105d116755490f5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SerahTerimaHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SerahTerimaHeader"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "SerahTerima"
+                ],
+                "summary": "Hapus serah terima",
+                "operationId": "147c3259c6c67623a49d01507869131d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Dihapus"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                }
+            }
+        },
+        "/api/serah-terima/{id}/restore": {
+            "post": {
+                "tags": [
+                    "SerahTerima"
+                ],
+                "summary": "Restore serah terima yang dihapus",
+                "operationId": "70a3948f7dfd78bdbc7d0e49c8671f81",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Restored"
+                    }
+                }
+            }
+        },
         "/api/users": {
             "get": {
                 "tags": [
@@ -3527,6 +4191,10 @@
                     "grup_asset": {
                         "$ref": "#/components/schemas/GrupAsset"
                     },
+                    "StatusID": {
+                        "type": "integer",
+                        "example": 1
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -3554,6 +4222,33 @@
                     "file_path": {
                         "type": "string",
                         "example": "uploads/assets/AST-001/image1.jpg"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "MasterStatusAsset": {
+                "title": "MasterStatusAsset",
+                "description": "Status dari aset (Aktif, Rusak, Scrap, dll)",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NamaStatusAsset": {
+                        "type": "string",
+                        "example": "Aktif"
+                    },
+                    "isDefault": {
+                        "type": "boolean",
+                        "example": true
                     },
                     "created_at": {
                         "type": "string",
@@ -3692,6 +4387,241 @@
                     }
                 },
                 "type": "object"
+            },
+            "PermintaanScrapDetail": {
+                "required": [
+                    "NoTransaksi",
+                    "NoUrut",
+                    "KodeAsset",
+                    "NamaAsset",
+                    "Qty",
+                    "KodeLokasi"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "SCRP-0001"
+                    },
+                    "NoUrut": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KodeAsset": {
+                        "type": "string",
+                        "example": "AST-1001"
+                    },
+                    "NamaAsset": {
+                        "type": "string",
+                        "example": "Laptop Rusak"
+                    },
+                    "Qty": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 2
+                    },
+                    "KodeLokasi": {
+                        "type": "string",
+                        "example": "GUD-001"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "PermintaanScrapHeader": {
+                "required": [
+                    "NoTransaksi",
+                    "TglTransaksi",
+                    "Requester"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "SCRP-0001"
+                    },
+                    "TglTransaksi": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-10-09"
+                    },
+                    "Requester": {
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "DocStatus": {
+                        "description": "0=Close, 1=Open, 99=Batal",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "Keterangan": {
+                        "type": "string",
+                        "example": "Scrap aset rusak"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "Approval": {
+                        "description": "0: Pending, 1: Approve, 9: Reject",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KeteranganApproval": {
+                        "type": "string",
+                        "example": "Disetujui oleh kepala gudang"
+                    },
+                    "ApproveDate": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-10-09 10:00:00"
+                    },
+                    "ApproveBy": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "details": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PermintaanScrapDetail"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "SerahTerimaDetail": {
+                "title": "Serah Terima Asset Detail",
+                "description": "Detail baris dari serah terima asset",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "NoSerahTerima": {
+                        "type": "string",
+                        "example": "STA-20251009-0001"
+                    },
+                    "NomorPermintaan": {
+                        "type": "string",
+                        "example": "PA-20251008-0005"
+                    },
+                    "NoUrutPermintaan": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KodeAsset": {
+                        "type": "string",
+                        "example": "AST-001"
+                    },
+                    "NamaAsset": {
+                        "type": "string",
+                        "example": "Laptop Dell XPS 13"
+                    },
+                    "QtyDiterima": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 2
+                    },
+                    "EstimasiHarga": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 14500000
+                    },
+                    "KodeLokasi": {
+                        "type": "string",
+                        "example": "LOC-001"
+                    },
+                    "Keterangan": {
+                        "type": "string",
+                        "example": "Serah sebagian pertama"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "permintaan_detail": {
+                        "$ref": "#/components/schemas/PermintaanAssetDetail"
+                    }
+                },
+                "type": "object"
+            },
+            "SerahTerimaHeader": {
+                "title": "Serah Terima Asset Header",
+                "description": "Header dokumen serah terima asset",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoSerahTerima": {
+                        "type": "string",
+                        "example": "STA-20251009-0001"
+                    },
+                    "TglSerahTerima": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-10-09"
+                    },
+                    "NomorPermintaan": {
+                        "type": "string",
+                        "example": "PA-20251008-0005"
+                    },
+                    "PenerimaID": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "Keterangan": {
+                        "type": "string",
+                        "example": "Serah terima pertama"
+                    },
+                    "DocStatus": {
+                        "description": "1=Open, 0=Close, 99=Batal",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "details": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SerahTerimaDetail"
+                        }
+                    },
+                    "employee": {
+                        "$ref": "#/components/schemas/Employee"
+                    },
+                    "permintaan": {
+                        "$ref": "#/components/schemas/PermintaanAssetHeader"
+                    }
+                },
+                "type": "object"
             }
         }
     },
@@ -3709,6 +4639,10 @@
             "description": "API for managing master assets"
         },
         {
+            "name": "MasterStatusAsset",
+            "description": "API untuk master status asset"
+        },
+        {
             "name": "Menu",
             "description": "Menu management"
         },
@@ -3717,12 +4651,20 @@
             "description": "API untuk transaksi permintaan asset"
         },
         {
+            "name": "PermintaanScrap",
+            "description": "API untuk permintaan scrap asset"
+        },
+        {
             "name": "Permissions",
             "description": "Permission management"
         },
         {
             "name": "Roles",
             "description": "Role management"
+        },
+        {
+            "name": "SerahTerima",
+            "description": "API untuk serah terima asset (mencatat penerimaan dari permintaan)"
         },
         {
             "name": "Users (API)",
@@ -3743,6 +4685,10 @@
         {
             "name": "Menus",
             "description": "Menus"
+        },
+        {
+            "name": "Permintaan Scrap",
+            "description": "Permintaan Scrap"
         }
     ]
 }

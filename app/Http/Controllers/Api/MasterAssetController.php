@@ -28,7 +28,7 @@ class MasterAssetController extends Controller
      */
     public function index()
     {
-        return MasterAsset::with(['employee', 'grupAsset', 'images'])->orderBy('id', 'desc')->get();
+        return MasterAsset::with(['employee', 'grupAsset', 'images', 'status'])->orderBy('id', 'desc')->get();
     }
 
     /**
@@ -67,10 +67,11 @@ class MasterAssetController extends Controller
             'Jumlah'          => 'required|numeric',
             'PIC'             => 'nullable|integer|exists:employees,id',
             'GrupAssetID' => 'nullable|integer|exists:grup_assets,id',
+            'StatusID' => 'nullable|integer|exists:master_status_assets,id',
         ]);
 
         $asset = MasterAsset::create($data);
-        return response()->json($asset->load(['employee', 'grupAsset', 'images']), 201);
+        return response()->json($asset->load(['employee', 'grupAsset', 'images', 'status']), 201);
     }
 
     /**
@@ -118,25 +119,26 @@ class MasterAssetController extends Controller
             'Keterangan' => 'nullable|string|max:255',
             'Jumlah' => 'nullable|numeric',
             'PIC' => 'nullable|integer|exists:employees,id',
+            'StatusID' => 'nullable|integer|exists:master_status_assets,id',
         ]);
 
         $asset->update($data);
 
         // 🔥 Hapus semua file lama & record image
-        if ($asset->images && count($asset->images) > 0) {
-            foreach ($asset->images as $img) {
-                \Storage::disk('public')->delete($img->file_path);
-                $img->delete();
-            }
-        }
+        // if ($asset->images && count($asset->images) > 0) {
+        //     foreach ($asset->images as $img) {
+        //         \Storage::disk('public')->delete($img->file_path);
+        //         $img->delete();
+        //     }
+        // }
 
-        // 🔥 Upload ulang jika ada file baru
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
-                $path = $file->store('uploads/assets/' . $asset->KodeAsset, 'public');
-                $asset->images()->create(['file_path' => $path]);
-            }
-        }
+        // // 🔥 Upload ulang jika ada file baru
+        // if ($request->hasFile('images')) {
+        //     foreach ($request->file('images') as $file) {
+        //         $path = $file->store('uploads/assets/' . $asset->KodeAsset, 'public');
+        //         $asset->images()->create(['file_path' => $path]);
+        //     }
+        // }
 
         return response()->json($asset->load(['employee', 'grupAsset', 'images']));
     }
@@ -230,4 +232,24 @@ class MasterAssetController extends Controller
         return response()->json(['message' => 'Image deleted']);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/master-assets/{asset_id}/stock/{location_id}",
+     *     summary="Get stock of a master asset at a specific location",
+     *     tags={"MasterAssets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="asset_id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="location_id", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Successful operation", @OA\JsonContent(type="object", @OA\Property(property="stock", type="number"))),
+     *     @OA\Response(response=404, description="Asset not found")
+     * )
+     */
+    public function getStock($asset_id, $location_id)
+    {
+        $stock = \App\Models\AssetLocationHistory::where('KodeAsset', $asset_id)
+            ->where('KodeLokasi', $location_id)
+            ->sum(\DB::raw('Jumlah'));
+
+        return response()->json(['stock' => $stock]);
+    }
 }

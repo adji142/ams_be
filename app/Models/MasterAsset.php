@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  *   @OA\Property(property="employee", ref="#/components/schemas/Employee"),
  *   @OA\Property(property="GrupAssetID", type="integer", example=2),
  *   @OA\Property(property="grup_asset", ref="#/components/schemas/GrupAsset"),
+ *   @OA\Property(property="StatusID", type="integer", example=1),
  *   @OA\Property(property="created_at", type="string", format="date-time", example="2025-10-06T12:34:56Z"),
  *   @OA\Property(property="updated_at", type="string", format="date-time", example="2025-10-06T12:34:56Z")
  * )
@@ -41,6 +42,7 @@ class MasterAsset extends Model
         'Keterangan',
         'Jumlah',
         'PIC',
+        'StatusID'
     ];
 
     public function employee()
@@ -54,5 +56,9 @@ class MasterAsset extends Model
     public function grupAsset()
     {
         return $this->belongsTo(\App\Models\GrupAsset::class, 'GrupAssetID');
+    }
+    public function status()
+    {
+        return $this->belongsTo(\App\Models\MasterStatusAsset::class, 'StatusID');
     }
 }

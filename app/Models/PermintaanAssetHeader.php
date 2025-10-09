@@ -47,6 +47,17 @@ class PermintaanAssetHeader extends Model
             });
     }
 
+    protected $appends = ['StatusText'];
+    public function getStatusTextAttribute()
+    {
+        return match ($this->DocStatus) {
+            0 => 'Close',
+            1 => 'Open',
+            99 => 'Batal',
+            default => 'Unknown',
+        };
+    }
+
     public function details()
     {
         return $this->hasMany(PermintaanAssetDetail::class, 'NoTransaksi', 'NoTransaksi');

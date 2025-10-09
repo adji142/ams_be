@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\LokasiAssetController;
 use App\Http\Controllers\Api\GrupAssetController;
 use App\Http\Controllers\Api\MasterAssetController;
 use App\Http\Controllers\Api\PermintaanAssetController;
+use App\Http\Controllers\Api\SerahTerimaController;
+use App\Http\Controllers\Api\MasterStatusAssetController;
+use App\Http\Controllers\Api\PermintaanScrapController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -50,9 +53,24 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Master Asset
     Route::apiResource('master-assets', MasterAssetController::class);
+    Route::get('master-assets/{asset_id}/stock/{location_id}', [MasterAssetController::class, 'getStock']);
     Route::post('master-assets/{id}/images', [MasterAssetController::class, 'uploadImages']);
     Route::delete('master-assets/{asset_id}/images/{image_id}', [MasterAssetController::class, 'deleteImage']);
 
+    // Master Status Asset
+    Route::apiResource('master-status-assets', MasterStatusAssetController::class);
+
     // Permintaan Asset
     Route::apiResource('permintaan-assets', PermintaanAssetController::class);
+    Route::get('permintaan-assets-bytrx/{noTransaksi}', [PermintaanAssetController::class, 'showbytrx']);
+
+
+    // Serah Terima Asset
+    Route::apiResource('serah-terima', SerahTerimaController::class);
+    Route::post('serah-terima/{id}/restore', [SerahTerimaController::class, 'restore']);
+
+    // Permintaan Scrap
+    Route::apiResource('permintaan-scrap', PermintaanScrapController::class);
+    Route::patch('permintaan-scrap/{id}/approval', [PermintaanScrapController::class, 'updateApproval']);
+
 });

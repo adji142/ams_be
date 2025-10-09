@@ -38,6 +38,12 @@ class PermintaanAssetController extends Controller
             $query->whereDate('TglTransaksi', '<=', $request->tgl_akhir);
         }
 
+        if ($request->filled('status')){
+            if($request->status == 'open'){
+                $query->where('DocStatus', 1);
+            }
+        }
+
         return $query->get();
     }
 
@@ -131,6 +137,26 @@ class PermintaanAssetController extends Controller
     {
         $header = PermintaanAssetHeader::with('details')->findOrFail($id);
         return response()->json($header);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/permintaan-assets-bytrx/{noTransaksi}",
+     *     summary="Ambil detail transaksi permintaan asset Berdasarkan NoTransaksi",
+     *     tags={"PermintaanAsset"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="noTransaksi", in="path", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Data ditemukan", @OA\JsonContent(ref="#/components/schemas/PermintaanAssetHeader")),
+     *     @OA\Response(response=404, description="Data tidak ditemukan")
+     * )
+     */
+    public function showbytrx($noTransaksi)
+    {
+        $data = PermintaanAssetHeader::with(['details'])
+            ->where('NoTransaksi', $noTransaksi)
+            ->firstOrFail();
+
+        return response()->json($data);
     }
 
     /**
