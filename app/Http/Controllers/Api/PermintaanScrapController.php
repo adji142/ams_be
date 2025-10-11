@@ -7,13 +7,19 @@ use Illuminate\Http\Request;
 use App\Models\PermintaanScrapHeader;
 use App\Models\PermintaanScrapDetail;
 use Illuminate\Support\Facades\DB;
+use App\Services\AssetStockService;
 
 /**
  * @OA\Tag(name="PermintaanScrap", description="API untuk permintaan scrap asset")
  */
 class PermintaanScrapController extends Controller
 {
+    protected $assetStockService;
 
+    public function __construct(AssetStockService $assetStockService)
+    {
+        $this->assetStockService = $assetStockService;
+    }
     /**
      * @OA\Get(
      *   path="/api/permintaan-scrap",
@@ -159,7 +165,12 @@ class PermintaanScrapController extends Controller
                 'details' => 'required|array|min:1',
             ]);
 
-            $header->update($validated);
+            $header->update([
+                'TglTransaksi' => $validated['TglTransaksi'],
+                'Requester' => $validated['Requester'],
+                'Keterangan' => $validated['Keterangan'] ?? null,
+                'Approval' => 0, // 👈 Reset approval setiap update
+            ]);
 
             // Hapus detail lama dan insert ulang
             $header->details()->delete();
@@ -199,7 +210,7 @@ class PermintaanScrapController extends Controller
     /**
      * @OA\Patch(
      *     path="/api/permintaan-scrap/{id}/approval",
-     *     tags={"Permintaan Scrap"},
+     *     tags={"PermintaanScrap"},
      *     summary="Approve atau Reject Permintaan Scrap",
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
      *     @OA\RequestBody(
@@ -214,21 +225,37 @@ class PermintaanScrapController extends Controller
      */
     public function updateApproval(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'Approval' => 'required|in:1,9',
             'KeteranganApproval' => 'nullable|string',
         ]);
 
-        $scrap = PermintaanScrapHeader::findOrFail($id);
-        $scrap->Approval = $request->Approval;
-        $scrap->KeteranganApproval = $request->KeteranganApproval;
-        $scrap->ApproveBy = auth()->id(); // jika pakai auth()
-        $scrap->ApproveDate = now();
-        $scrap->save();
+        DB::transaction(function () use ($validated, $id, $request) {
+            $scrap = PermintaanScrapHeader::findOrFail($id);
+            $scrap->Approval = $request->Approval;
+            $scrap->KeteranganApproval = $request->KeteranganApproval;
+            $scrap->ApproveBy = auth()->id(); // jika pakai auth()
+            $scrap->ApproveDate = now();
+            $scrap->save();
+
+            if ($request->Approval == 1) {
+                $header = PermintaanScrapHeader::with('details')->findOrFail($id);
+                foreach ($header->details as $d) {
+                    $this->assetStockService->removeStock(
+                        $d->KodeAsset,
+                        $d->KodeLokasi,
+                        $d->Qty,
+                        $header->NoTransaksi,
+                        'Scrap Asset',
+                    );
+                }
+            }
+        });
+
+        
 
         return response()->json([
-            'message' => 'Status approval berhasil diperbarui',
-            'data' => $scrap,
+            'message' => 'Status approval berhasil diperbarui'
         ]);
     }
 

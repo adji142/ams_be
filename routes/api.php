@@ -14,6 +14,9 @@ use App\Http\Controllers\Api\PermintaanAssetController;
 use App\Http\Controllers\Api\SerahTerimaController;
 use App\Http\Controllers\Api\MasterStatusAssetController;
 use App\Http\Controllers\Api\PermintaanScrapController;
+use App\Http\Controllers\Api\MutasiAssetController;
+use App\Http\Controllers\Api\PermintaanPerbaikanController;
+use App\Http\Controllers\Api\AssetReportController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -56,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('master-assets/{asset_id}/stock/{location_id}', [MasterAssetController::class, 'getStock']);
     Route::post('master-assets/{id}/images', [MasterAssetController::class, 'uploadImages']);
     Route::delete('master-assets/{asset_id}/images/{image_id}', [MasterAssetController::class, 'deleteImage']);
+    Route::get('master-assets/{kodeAsset}/location-stock-summary', [MasterAssetController::class, 'getLocationStockSummary']);
 
     // Master Status Asset
     Route::apiResource('master-status-assets', MasterStatusAssetController::class);
@@ -73,4 +77,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('permintaan-scrap', PermintaanScrapController::class);
     Route::patch('permintaan-scrap/{id}/approval', [PermintaanScrapController::class, 'updateApproval']);
 
+    // Mutasi Asset
+    Route::apiResource('mutasi-assets', MutasiAssetController::class);
+
+    // Permintaan Perbaikan Asset
+    Route::apiResource('permintaan-perbaikan-assets', PermintaanPerbaikanController::class);
+    Route::patch('permintaan-perbaikan-assets/{id}/approval', [PermintaanPerbaikanController::class, 'updateApproval']);
+    Route::get('permintaan-perbaikan-assets/approved/{KodeAsset}', [PermintaanPerbaikanController::class, 'getApprovedRequests']);
+
+
+    // Reporting
+    Route::get('/reports/assets', [AssetReportController::class, 'index']);
+
+    // Dashboard
+    Route::get('/dashboard/summary', [App\Http\Controllers\Api\DashboardController::class, 'getAssetSummary']);
+    Route::get('/dashboard/summary-by-group', [App\Http\Controllers\Api\DashboardController::class, 'getSummaryByGroup']);
+    Route::get('/dashboard/repair-summary-by-month', [App\Http\Controllers\Api\DashboardController::class, 'getRepairSummaryByMonth']);
 });

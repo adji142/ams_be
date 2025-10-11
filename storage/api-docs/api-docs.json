@@ -11,6 +11,103 @@
         }
     ],
     "paths": {
+        "/api/reports/assets": {
+            "get": {
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get a filtered list of assets for reporting",
+                "operationId": "d19f86cdd0e1d0dc055c413b9f5475ab",
+                "parameters": [
+                    {
+                        "name": "kondisi",
+                        "in": "query",
+                        "description": "Filter by asset condition ('Baik' or 'Repair')",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "Baik",
+                                "Repair"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "status_id",
+                        "in": "query",
+                        "description": "Filter by asset status ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "lokasi_id",
+                        "in": "query",
+                        "description": "Filter by asset location ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "NoAsset": {
+                                                "type": "string",
+                                                "example": "AST-001"
+                                            },
+                                            "NamaAsset": {
+                                                "type": "string",
+                                                "example": "Laptop Dell"
+                                            },
+                                            "PerkiraanHarga": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 15000000
+                                            },
+                                            "Jumlah": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "PIC": {
+                                                "type": "string",
+                                                "example": "John Doe"
+                                            },
+                                            "Departemen": {
+                                                "type": "string",
+                                                "example": "IT"
+                                            },
+                                            "Lokasi": {
+                                                "type": "string",
+                                                "example": "Gudang Utama"
+                                            },
+                                            "StatusAsset": {
+                                                "type": "string",
+                                                "example": "Aktif"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
@@ -227,6 +324,172 @@
                     },
                     "401": {
                         "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/summary": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get asset summary",
+                "operationId": "b0f3eed2d4a9db655b2770f980fec899",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data summary asset berhasil diambil."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "total_asset": {
+                                                    "type": "integer",
+                                                    "example": 100
+                                                },
+                                                "asset_baik": {
+                                                    "type": "integer",
+                                                    "example": 95
+                                                },
+                                                "asset_repair": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/summary-by-group": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get asset summary by group",
+                "operationId": "f77e13d3e1ec1d2846617ca342892bca",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data summary asset per grup berhasil diambil."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "grup_asset": {
+                                                        "type": "string",
+                                                        "example": "Elektronik"
+                                                    },
+                                                    "total_asset": {
+                                                        "type": "integer",
+                                                        "example": 50
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/repair-summary-by-month": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get asset repair summary by month",
+                "operationId": "4b5c06a4782f61b13cde2283c910d693",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data summary perbaikan asset per bulan berhasil diambil."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "bulan": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "total_qty": {
+                                                        "type": "integer",
+                                                        "example": 15
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
@@ -1453,6 +1716,60 @@
                 ]
             }
         },
+        "/api/master-assets/{kodeAsset}/location-stock-summary": {
+            "get": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Get asset stock summary by location",
+                "operationId": "bbbfc1f6a6ab1bd2bfbfabdc5334d204",
+                "parameters": [
+                    {
+                        "name": "kodeAsset",
+                        "in": "path",
+                        "description": "Kode Asset",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "KodeLokasi": {
+                                                "type": "string"
+                                            },
+                                            "NamaLokasi": {
+                                                "type": "string"
+                                            },
+                                            "total_stock": {
+                                                "type": "number"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/master-status-assets": {
             "get": {
                 "tags": [
@@ -1837,6 +2154,90 @@
                 ]
             }
         },
+        "/api/mutasi-assets": {
+            "get": {
+                "tags": [
+                    "MutasiAsset"
+                ],
+                "summary": "Ambil semua transaksi mutasi asset (dengan filter tanggal & status)",
+                "operationId": "4e3ff89e7c163c77bf2cf656082e83f7",
+                "responses": {
+                    "200": {
+                        "description": "Sukses"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "MutasiAsset"
+                ],
+                "summary": "Tambah mutasi asset baru",
+                "operationId": "48fd86956cb8f85c38ba65f89b632c26",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MutasiAssetHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sukses"
+                    }
+                }
+            }
+        },
+        "/api/mutasi-assets/{id}": {
+            "get": {
+                "tags": [
+                    "MutasiAsset"
+                ],
+                "summary": "Ambil detail mutasi asset",
+                "operationId": "d56cfae92ff1e77eff932a2666224e95",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sukses"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "MutasiAsset"
+                ],
+                "summary": "Update mutasi asset dan sinkron stok ulang",
+                "operationId": "d2d369242338a0560f46e7af0c7b0b56",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil diperbarui"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "MutasiAsset"
+                ],
+                "summary": "Hapus mutasi asset (soft delete) dan rollback stok",
+                "operationId": "6c8f2c7b0e9a69e048aef5aa2381ee85",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil dihapus"
+                    }
+                }
+            }
+        },
         "/api/permintaan-assets": {
             "get": {
                 "tags": [
@@ -2102,6 +2503,185 @@
                 ]
             }
         },
+        "/api/permintaan-perbaikan-assets": {
+            "get": {
+                "tags": [
+                    "PermintaanPerbaikanAsset"
+                ],
+                "summary": "Menampilkan semua permintaan perbaikan asset",
+                "operationId": "70714851057e969468c2cb516b8a0c31",
+                "responses": {
+                    "200": {
+                        "description": "Daftar permintaan perbaikan"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "PermintaanPerbaikanAsset"
+                ],
+                "summary": "Menambahkan permintaan perbaikan asset",
+                "operationId": "64ac2d1d74b6b8678ddb4ef573bec6b3",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermintaanPerbaikanHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Berhasil disimpan"
+                    }
+                }
+            }
+        },
+        "/api/permintaan-perbaikan-assets/{id}": {
+            "get": {
+                "tags": [
+                    "PermintaanPerbaikanAsset"
+                ],
+                "summary": "Menampilkan detail perbaikan asset",
+                "operationId": "aeec6223977fd712dc4fac3b53fa2187",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail perbaikan asset"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "PermintaanPerbaikanAsset"
+                ],
+                "summary": "Update data perbaikan asset",
+                "operationId": "ef52469601f634f7d054ec10b3add455",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PermintaanPerbaikanHeader"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Berhasil diupdate"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "PermintaanPerbaikanAsset"
+                ],
+                "summary": "Soft delete permintaan perbaikan",
+                "operationId": "62cebb1c6829113cc107c47a1852942d",
+                "responses": {
+                    "200": {
+                        "description": "Berhasil dihapus"
+                    }
+                }
+            }
+        },
+        "/api/permintaan-perbaikan-assets/{id}/approval": {
+            "patch": {
+                "tags": [
+                    "PermintaanPerbaikanAsset"
+                ],
+                "summary": "Approve/Reject permintaan perbaikan",
+                "operationId": "eecb0247c72c997f89c23150e1234f14",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "Approval": {
+                                        "type": "integer",
+                                        "enum": [
+                                            1,
+                                            2,
+                                            9
+                                        ]
+                                    },
+                                    "KeteranganApproval": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Approval berhasil diupdate"
+                    }
+                }
+            }
+        },
+        "/api/permintaan-perbaikan-assets/approved/{KodeAsset}": {
+            "get": {
+                "tags": [
+                    "PermintaanPerbaikanAsset"
+                ],
+                "summary": "Menampilkan total kuantitas aset yang sudah di approve untuk perbaikan berdasarkan KodeAsset",
+                "operationId": "d62e765433c1b346abcd8b1c7b8306a3",
+                "parameters": [
+                    {
+                        "name": "KodeAsset",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Total kuantitas aset yang sedang diperbaiki",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_qty": {
+                                            "type": "integer",
+                                            "example": 5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data not found"
+                    }
+                }
+            }
+        },
         "/api/permintaan-scrap": {
             "get": {
                 "tags": [
@@ -2253,7 +2833,7 @@
         "/api/permintaan-scrap/{id}/approval": {
             "patch": {
                 "tags": [
-                    "Permintaan Scrap"
+                    "PermintaanScrap"
                 ],
                 "summary": "Approve atau Reject Permintaan Scrap",
                 "operationId": "b810c599d0bf6e13458ae8b37100b9cf",
@@ -4308,6 +4888,88 @@
                 },
                 "type": "object"
             },
+            "MutasiAssetDetail": {
+                "title": "Mutasi Asset Detail",
+                "required": [
+                    "NoTransaksi",
+                    "KodeAsset",
+                    "Qty"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "MT-20251009-0001"
+                    },
+                    "NoUrut": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KodeAsset": {
+                        "type": "string",
+                        "example": "AST-0001"
+                    },
+                    "NamaAsset": {
+                        "type": "string",
+                        "example": "Laptop Dell XPS 13"
+                    },
+                    "Qty": {
+                        "type": "number",
+                        "format": "double",
+                        "example": 2
+                    },
+                    "KodeLokasiAsal": {
+                        "type": "string",
+                        "example": "LOC-001"
+                    },
+                    "KodeLokasiTujuan": {
+                        "type": "string",
+                        "example": "LOC-002"
+                    }
+                },
+                "type": "object"
+            },
+            "MutasiAssetHeader": {
+                "title": "Mutasi Asset Header",
+                "required": [
+                    "NoTransaksi",
+                    "TglTransaksi"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "MT-20251009-0001"
+                    },
+                    "TglTransaksi": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-10-09"
+                    },
+                    "DocStatus": {
+                        "description": "1=Open, 0=Close, 99=Batal",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "Keterangan": {
+                        "type": "string",
+                        "example": "Pemindahan asset ke gudang baru"
+                    },
+                    "details": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MutasiAssetDetail"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "PermintaanAssetDetail": {
                 "title": "Permintaan Asset Detail",
                 "description": "Detail transaksi permintaan asset",
@@ -4384,6 +5046,71 @@
                         "items": {
                             "$ref": "#/components/schemas/PermintaanAssetDetail"
                         }
+                    }
+                },
+                "type": "object"
+            },
+            "PermintaanPerbaikanDetail": {
+                "title": "Permintaan Perbaikan Detail",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "NoTransaksi": {
+                        "type": "string"
+                    },
+                    "NoUrut": {
+                        "type": "integer"
+                    },
+                    "KodeAsset": {
+                        "type": "string"
+                    },
+                    "NamaAsset": {
+                        "type": "string"
+                    },
+                    "Qty": {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    "KodeLokasi": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            },
+            "PermintaanPerbaikanHeader": {
+                "title": "Permintaan Perbaikan Header",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "PPB-20251009-0001"
+                    },
+                    "TglTransaksi": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "DocStatus": {
+                        "type": "integer"
+                    },
+                    "Keterangan": {
+                        "type": "string"
+                    },
+                    "Approval": {
+                        "description": "0: Pending, 1: Approve, 2: Selesai, 9: Reject",
+                        "type": "integer"
+                    },
+                    "KeteranganApproval": {
+                        "type": "string"
+                    },
+                    "ApproveDate": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "ApproveBy": {
+                        "type": "string"
                     }
                 },
                 "type": "object"
@@ -4627,6 +5354,14 @@
     },
     "tags": [
         {
+            "name": "Reports",
+            "description": "API for generating reports"
+        },
+        {
+            "name": "Dashboard",
+            "description": "API for dashboard summaries"
+        },
+        {
             "name": "Employees",
             "description": "API for managing employees"
         },
@@ -4647,8 +5382,16 @@
             "description": "Menu management"
         },
         {
+            "name": "MutasiAsset",
+            "description": "API untuk Mutasi Asset antar lokasi"
+        },
+        {
             "name": "PermintaanAsset",
             "description": "API untuk transaksi permintaan asset"
+        },
+        {
+            "name": "PermintaanPerbaikanAsset",
+            "description": "API untuk permintaan perbaikan asset"
         },
         {
             "name": "PermintaanScrap",
@@ -4685,10 +5428,6 @@
         {
             "name": "Menus",
             "description": "Menus"
-        },
-        {
-            "name": "Permintaan Scrap",
-            "description": "Permintaan Scrap"
         }
     ]
 }

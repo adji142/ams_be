@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('permintaanscrapheader', function (Blueprint $table) {
+        Schema::table('permintaan_scrap_headers', function (Blueprint $table) {
             $table->tinyInteger('Approval')->default(0)->comment('0: Pending, 1: Approve, 9: Reject');
             $table->string('KeteranganApproval')->nullable();
             $table->dateTime('ApproveDate')->nullable();
@@ -21,7 +21,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('permintaanscrapheader', function (Blueprint $table) {
+        Schema::table('permintaan_scrap_headers', function (Blueprint $table) {
             $table->dropForeign(['ApproveBy']);
             $table->dropColumn(['Approval', 'KeteranganApproval', 'ApproveDate', 'ApproveBy']);
         });

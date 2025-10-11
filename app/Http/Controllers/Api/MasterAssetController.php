@@ -252,4 +252,48 @@ class MasterAssetController extends Controller
 
         return response()->json(['stock' => $stock]);
     }
+
+    /**
+     * @OA\Get(
+     *     path="/api/master-assets/{kodeAsset}/location-stock-summary",
+     *     summary="Get asset stock summary by location",
+     *     tags={"MasterAssets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="kodeAsset",
+     *         in="path",
+     *         required=true,
+     *         description="Kode Asset",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 @OA\Property(property="KodeLokasi", type="string"),
+     *                 @OA\Property(property="NamaLokasi", type="string"),
+     *                 @OA\Property(property="total_stock", type="number")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Data not found")
+     * )
+     */
+    public function getLocationStockSummary($kodeAsset)
+    {
+        $stockData = \App\Models\AssetLocationHistory::join('lokasi_assets', 'asset_location_histories.KodeLokasi', '=', 'lokasi_assets.kode_lokasi')
+            ->select('asset_location_histories.KodeLokasi', 'lokasi_assets.nama_lokasi', \DB::raw('SUM(asset_location_histories.Jumlah) as total_stock'))
+            ->where('asset_location_histories.KodeAsset', $kodeAsset)
+            ->groupBy('asset_location_histories.KodeLokasi', 'lokasi_assets.nama_lokasi')
+            ->havingRaw('SUM(asset_location_histories.Jumlah) > 0')
+            ->get();
+
+        if ($stockData->isEmpty()) {
+            return response()->json(['message' => 'Stock not found for this asset'], 404);
+        }
+
+        return response()->json($stockData);
+    }
 }
