@@ -25,28 +25,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y lftp
 
-      # 4️⃣ Deploy ke shared hosting via FTP
       - name: Deploy via FTP (incremental)
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
+          echo "🔍 Testing FTP connection..."
+          lftp -u $FTP_USER,$FTP_PASSWORD -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; ls; bye" $FTP_HOST
+
+          echo "🚀 Starting deploy..."
           lftp -u $FTP_USER,$FTP_PASSWORD $FTP_HOST <<EOF
-          set ftp:ssl-allow no
+          set ftp:ssl-allow yes
+          set ssl:verify-certificate no
           set net:timeout 10
           set net:max-retries 2
           set net:reconnect-interval-base 5
           
-          # Upload incremental ke folder tujuan
           mirror -R --only-newer --parallel=5 --verbose \
             --exclude .git/ \
             --exclude .github/ \
             --exclude node_modules/ \
-            --exclude tests/ \
-            --exclude storage/logs/ \
-            --exclude vendor/ \
             ./ /home/aisk7155/public_html/be.aissystem.org/ams/
-
-          quit
+          bye
           EOF
+
