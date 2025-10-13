@@ -1,0 +1,52 @@
+name: 🚀 Deploy Laravel ke Shared Hosting
+
+on:
+  push:
+    branches:
+      - main  # branch utama untuk trigger deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Install dependencies Laravel (tanpa dev)
+      - name: Install PHP dependencies
+        run: |
+          composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      # 3️⃣ Install lftp (alat FTP command-line)
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      # 4️⃣ Deploy ke shared hosting via FTP
+      - name: Deploy via FTP (incremental)
+        env:
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -u $FTP_USER,$FTP_PASSWORD $FTP_HOST <<EOF
+          set ftp:ssl-allow no
+          set net:timeout 10
+          set net:max-retries 2
+          set net:reconnect-interval-base 5
+          
+          # Upload incremental ke folder tujuan
+          mirror -R --only-newer --parallel=5 --verbose \
+            --exclude .git/ \
+            --exclude .github/ \
+            --exclude node_modules/ \
+            --exclude tests/ \
+            --exclude storage/logs/ \
+            --exclude vendor/ \
+            ./ /home/aisk7155/public_html/be.aissystem.org/ams/
+
+          quit
+          EOF
