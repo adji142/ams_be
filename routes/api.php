@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\PermintaanScrapController;
 use App\Http\Controllers\Api\MutasiAssetController;
 use App\Http\Controllers\Api\PermintaanPerbaikanController;
 use App\Http\Controllers\Api\AssetReportController;
+use App\Http\Controllers\Api\CompanySettingController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -93,4 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/summary', [App\Http\Controllers\Api\DashboardController::class, 'getAssetSummary']);
     Route::get('/dashboard/summary-by-group', [App\Http\Controllers\Api\DashboardController::class, 'getSummaryByGroup']);
     Route::get('/dashboard/repair-summary-by-month', [App\Http\Controllers\Api\DashboardController::class, 'getRepairSummaryByMonth']);
+
+    // Company Settings
+    Route::apiResource('company-settings', CompanySettingController::class);
 });

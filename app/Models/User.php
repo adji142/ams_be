@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $fillable = ['name','email','password'];
+    protected $fillable = ['name','email','password', 'UseForMobile'];
     protected $hidden = ['password','remember_token'];
 
     // relasi

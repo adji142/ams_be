@@ -333,6 +333,124 @@
                 ]
             }
         },
+        "/api/company-settings": {
+            "get": {
+                "tags": [
+                    "Company Settings"
+                ],
+                "summary": "Get company settings",
+                "operationId": "8175266b0213efbeee9f076605e18dbe",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CompanySetting"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Settings not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Company Settings"
+                ],
+                "summary": "Create or update company settings",
+                "operationId": "5286bf12ac014367fe71e37d117810e8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "NamaPerusahaan": {
+                                        "type": "string",
+                                        "example": "PT. Contoh Jaya"
+                                    },
+                                    "Alamat1": {
+                                        "type": "string",
+                                        "example": "Jl. Jendral Sudirman No. 1"
+                                    },
+                                    "Alamat2": {
+                                        "type": "string",
+                                        "example": "Jakarta Selatan, Indonesia"
+                                    },
+                                    "Email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "info@contohjaya.com"
+                                    },
+                                    "NoTlp": {
+                                        "type": "string",
+                                        "example": "021-12345678"
+                                    },
+                                    "Icon": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "LabelWidth": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100.5
+                                    },
+                                    "LabelHeight": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50.5
+                                    },
+                                    "H1Size": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 24
+                                    },
+                                    "H2Size": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 18
+                                    },
+                                    "PSize": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 12
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Settings saved",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CompanySetting"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/dashboard/summary": {
             "get": {
                 "tags": [
@@ -4553,6 +4671,73 @@
     },
     "components": {
         "schemas": {
+            "CompanySetting": {
+                "title": "CompanySetting",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NamaPerusahaan": {
+                        "type": "string",
+                        "example": "PT. Contoh Jaya"
+                    },
+                    "Alamat1": {
+                        "type": "string",
+                        "example": "Jl. Jendral Sudirman No. 1"
+                    },
+                    "Alamat2": {
+                        "type": "string",
+                        "example": "Jakarta Selatan, Indonesia"
+                    },
+                    "Email": {
+                        "type": "string",
+                        "example": "info@contohjaya.com"
+                    },
+                    "NoTlp": {
+                        "type": "string",
+                        "example": "021-12345678"
+                    },
+                    "Icon": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "LabelWidth": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 100.5
+                    },
+                    "LabelHeight": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 50.5
+                    },
+                    "H1Size": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 24
+                    },
+                    "H2Size": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 18
+                    },
+                    "PSize": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 12
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "Department": {
                 "title": "Department",
                 "required": [
@@ -5416,6 +5601,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Company Settings",
+            "description": "Company Settings"
         },
         {
             "name": "Departments",

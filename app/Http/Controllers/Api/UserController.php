@@ -30,6 +30,7 @@ class UserController extends Controller
      *                  @OA\Property(property="id", type="integer", example=1),
      *                  @OA\Property(property="name", type="string", example="John Doe"),
      *                  @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+     *                  @OA\Property(property="UseForMobile", type="boolean", example=false),
      *                  @OA\Property(property="email_verified_at", type="string", format="date-time"),
      *                  @OA\Property(property="created_at", type="string", format="date-time"),
      *                  @OA\Property(property="updated_at", type="string", format="date-time"),
@@ -68,6 +69,7 @@ class UserController extends Controller
      *              @OA\Property(property="id", type="integer", example=1),
      *              @OA\Property(property="name", type="string", example="John Doe"),
      *              @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+     *              @OA\Property(property="UseForMobile", type="boolean", example=false),
      *              @OA\Property(property="email_verified_at", type="string", format="date-time"),
      *              @OA\Property(property="created_at", type="string", format="date-time"),
      *              @OA\Property(property="updated_at", type="string", format="date-time"),
@@ -95,6 +97,7 @@ class UserController extends Controller
      *              @OA\Property(property="name", type="string", example="Api User"),
      *              @OA\Property(property="email", type="string", format="email", example="api.user@example.com"),
      *              @OA\Property(property="password", type="string", format="password", example="password"),
+     *              @OA\Property(property="UseForMobile", type="boolean", example=false, description="Flag for mobile usage"),
      *              @OA\Property(property="roles", type="array", @OA\Items(type="integer", example=1), description="Array of Role IDs"),
      *              @OA\Property(property="permissions", type="array", @OA\Items(type="integer", example=1), description="Array of Permission IDs")
      *          )
@@ -107,6 +110,7 @@ class UserController extends Controller
      *              @OA\Property(property="id", type="integer", example=1),
      *              @OA\Property(property="name", type="string", example="Api User"),
      *              @OA\Property(property="email", type="string", format="email", example="api.user@example.com"),
+     *              @OA\Property(property="UseForMobile", type="boolean", example=false),
      *              @OA\Property(property="email_verified_at", type="string", format="date-time"),
      *              @OA\Property(property="created_at", type="string", format="date-time"),
      *              @OA\Property(property="updated_at", type="string", format="date-time"),
@@ -120,7 +124,8 @@ class UserController extends Controller
     public function store(Request $request) {
         $data = $request->validate([
             'name'=>'required|string','email'=>'required|email|unique:users','password'=>'required|string|min:6',
-            'roles'=>'array','permissions'=>'array'
+            'roles'=>'array','permissions'=>'array',
+            'UseForMobile' => 'boolean'
         ]);
         $data['password'] = bcrypt($data['password']);
         $user = User::create($data);
@@ -144,6 +149,7 @@ class UserController extends Controller
      *              @OA\Property(property="name", type="string", example="Api User Updated"),
      *              @OA\Property(property="email", type="string", format="email", example="api.user.updated@example.com"),
      *              @OA\Property(property="password", type="string", format="password", example="newpassword"),
+     *              @OA\Property(property="UseForMobile", type="boolean", example=true, description="Flag for mobile usage"),
      *              @OA\Property(property="roles", type="array", @OA\Items(type="integer", example=2), description="Array of Role IDs"),
      *              @OA\Property(property="permissions", type="array", @OA\Items(type="integer", example=3), description="Array of Permission IDs")
      *          )
@@ -156,6 +162,7 @@ class UserController extends Controller
      *              @OA\Property(property="id", type="integer", example=1),
      *              @OA\Property(property="name", type="string", example="Api User Updated"),
      *              @OA\Property(property="email", type="string", format="email", example="api.user.updated@example.com"),
+     *              @OA\Property(property="UseForMobile", type="boolean", example=true),
      *              @OA\Property(property="email_verified_at", type="string", format="date-time"),
      *              @OA\Property(property="created_at", type="string", format="date-time"),
      *              @OA\Property(property="updated_at", type="string", format="date-time"),
@@ -170,7 +177,8 @@ class UserController extends Controller
     public function update(Request $request, User $user) {
         $data = $request->validate([
             'name'=>'sometimes|string','email'=>"sometimes|email|unique:users,email,{$user->id}",'password'=>'nullable|string|min:6',
-            'roles'=>'array','permissions'=>'array'
+            'roles'=>'array','permissions'=>'array',
+            'UseForMobile' => 'sometimes|boolean'
         ]);
         if(!empty($data['password'])) $data['password'] = bcrypt($data['password']); else unset($data['password']);
         $user->update($data);
