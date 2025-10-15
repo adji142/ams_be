@@ -158,4 +158,7 @@ class AuthController extends Controller
     {
         return response()->json($request->user());
     }
+    public function test(){
+        return response()->json(['message' => 'Connection Successfully'], 200);
+    }
 }
