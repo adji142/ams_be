@@ -18,6 +18,9 @@ use App\Http\Controllers\Api\MutasiAssetController;
 use App\Http\Controllers\Api\PermintaanPerbaikanController;
 use App\Http\Controllers\Api\AssetReportController;
 use App\Http\Controllers\Api\CompanySettingController;
+use App\Http\Controllers\Api\AssetCountController;
+use App\Http\Controllers\Api\ImportAssetController;
+use App\Http\Controllers\Api\EmployeeImportController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -55,6 +58,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('grup-assets', GrupAssetController::class);
     // Lokasi Asset
     Route::apiResource('lokasi-assets', LokasiAssetController::class);
+    Route::get('lokasi-assets/{lokasiAsset}/assets', [LokasiAssetController::class, 'getAssets']);
 
     // Master Asset
     Route::apiResource('master-assets', MasterAssetController::class);
@@ -62,6 +66,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('master-assets/{id}/images', [MasterAssetController::class, 'uploadImages']);
     Route::delete('master-assets/{asset_id}/images/{image_id}', [MasterAssetController::class, 'deleteImage']);
     Route::get('master-assets/{kodeAsset}/location-stock-summary', [MasterAssetController::class, 'getLocationStockSummary']);
+    Route::get('lokasi-with-stock/{lokasiID?}', [MasterAssetController::class, 'getLokasiWithStock']);
+
 
     // Master Status Asset
     Route::apiResource('master-status-assets', MasterStatusAssetController::class);
@@ -98,4 +104,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Company Settings
     Route::apiResource('company-settings', CompanySettingController::class);
+
+    // Asset Count
+    Route::apiResource('asset-counts', AssetCountController::class);
+
+    // Import
+    Route::post('import-master-assets', [ImportAssetController::class, 'importBulk']);
+    Route::post('import-employees', [EmployeeImportController::class, 'import']);
 });

@@ -19,6 +19,13 @@ class MasterAssetController extends Controller
      *     summary="List all master assets",
      *     tags={"MasterAssets"},
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="GrupAssetID",
+     *         in="query",
+     *         description="Filter by Grup Asset ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -26,9 +33,17 @@ class MasterAssetController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        return MasterAsset::with(['employee', 'grupAsset', 'images', 'status'])->orderBy('id', 'desc')->get();
+        $grupAssetID = $request->query('GrupAssetID');
+
+        $query = MasterAsset::with(['employee', 'grupAsset', 'images', 'status']);
+
+        if ($grupAssetID) {
+            $query->where('GrupAssetID', $grupAssetID);
+        }
+
+        return $query->orderBy('id', 'desc')->get();
     }
 
     /**
@@ -295,5 +310,62 @@ class MasterAssetController extends Controller
         }
 
         return response()->json($stockData);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/lokasi-with-stock/{lokasiID?}",
+     *     summary="Get locations with asset stock, optionally filtered by location ID",
+     *     tags={"MasterAssets"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="lokasiID",
+     *         in="path",
+     *         description="Optional ID of the location to filter by",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
+    public function getLokasiWithStock($lokasiID = null)
+    {
+        $query = \App\Models\AssetLocationHistory::with(['lokasi', 'asset'])
+            ->select('KodeLokasi', 'KodeAsset', \DB::raw('SUM(Jumlah) as total_stock'))
+            ->groupBy('KodeLokasi', 'KodeAsset')
+            ->having('total_stock', '>', 0);
+
+        if ($lokasiID) {
+            $lokasiAsset = \App\Models\LokasiAsset::find($lokasiID);
+            if ($lokasiAsset) {
+                $query->where('KodeLokasi', $lokasiAsset->kode_lokasi);
+            } else {
+                return response()->json([]); // Return empty if LokasiID is invalid
+            }
+        }
+
+        $stockData = $query->get();
+
+        $locations = [];
+        foreach ($stockData as $stock) {
+            if ($stock->lokasi) {
+                $locationId = $stock->lokasi->id;
+                if (!isset($locations[$locationId])) {
+                    $locations[$locationId] = $stock->lokasi->toArray();
+                    $locations[$locationId]['assets'] = [];
+                }
+
+                if ($stock->asset) {
+                    $assetData = $stock->asset->toArray();
+                    $assetData['stock_in_location'] = $stock->total_stock;
+                    $locations[$locationId]['assets'][] = $assetData;
+                }
+            }
+        }
+
+        return response()->json(array_values($locations));
     }
 }

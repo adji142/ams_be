@@ -13,4 +13,14 @@ class AssetLocationHistory extends Model
         'KodeLokasi',
         'Jumlah'
     ];
+
+    public function asset()
+    {
+        return $this->belongsTo(MasterAsset::class, 'KodeAsset', 'KodeAsset');
+    }
+
+    public function lokasi()
+    {
+        return $this->belongsTo(LokasiAsset::class, 'KodeLokasi', 'kode_lokasi');
+    }
 }

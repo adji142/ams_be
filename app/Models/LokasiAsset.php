@@ -18,19 +18,19 @@ use Illuminate\Database\Eloquent\Model;
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time")
  * )
- */
-class LokasiAsset extends Model
-{
-    protected $fillable = [
-        'kode_lokasi',
-        'nama_lokasi',
-        'keterangan',
-        'pic_id',
-        'asset_count'
-    ];
-
-    public function pic()
-    {
-        return $this->belongsTo(Employee::class, 'pic_id');
-    }
-}
+*/
+ class LokasiAsset extends Model
+ {
+     protected $fillable = [
+         'kode_lokasi',
+         'nama_lokasi',
+         'keterangan',
+         'pic_id',
+         'asset_count'
+     ];
+ 
+     public function pic()
+     {
+         return $this->belongsTo(Employee::class, 'pic_id');
+     }
+ }
