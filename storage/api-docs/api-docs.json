@@ -11,6 +11,283 @@
         }
     ],
     "paths": {
+        "/api/asset-counts": {
+            "get": {
+                "tags": [
+                    "Asset Count"
+                ],
+                "summary": "Menampilkan daftar histori asset count (header) dengan filter",
+                "operationId": "1d7e8ccb92c07287a34f7a2da50dfaaa",
+                "parameters": [
+                    {
+                        "name": "TglAwal",
+                        "in": "query",
+                        "description": "Tanggal awal filter (format: YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "TglAkhir",
+                        "in": "query",
+                        "description": "Tanggal akhir filter (format: YYYY-MM-DD)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "LokasiID",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Lokasi",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "AssetGrupID",
+                        "in": "query",
+                        "description": "Filter berdasarkan ID Grup Aset yang ada di dalam transaksi",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/HeaderAssetCount"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal, parameter tanggal wajib diisi"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Asset Count"
+                ],
+                "summary": "Membuat transaksi asset count baru (Add)",
+                "operationId": "50d86a7cc6b731494e1862f3252773ce",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "NoTransaksi",
+                                    "TglTransaksi",
+                                    "PICID",
+                                    "LokasiID",
+                                    "details"
+                                ],
+                                "properties": {
+                                    "NoTransaksi": {
+                                        "type": "string",
+                                        "example": "AC/2025/10/002"
+                                    },
+                                    "TglTransaksi": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-18"
+                                    },
+                                    "PICID": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "LokasiID": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "details": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "AssetID",
+                                                "LineNumber",
+                                                "Jumlah"
+                                            ],
+                                            "properties": {
+                                                "AssetID": {
+                                                    "type": "integer",
+                                                    "example": 101
+                                                },
+                                                "LineNumber": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "Jumlah": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HeaderAssetCount"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    }
+                }
+            }
+        },
+        "/api/asset-counts/{id}": {
+            "get": {
+                "tags": [
+                    "Asset Count"
+                ],
+                "summary": "Menampilkan detail sebuah transaksi asset count",
+                "operationId": "a86819b20d4711e750dd370687fe1f43",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HeaderAssetCount"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Asset Count"
+                ],
+                "summary": "Mengupdate transaksi asset count (header dan semua detail sekaligus)",
+                "description": "Endpoint ini menangani update header, penambahan detail baru, update detail yang ada, dan penghapusan detail dalam satu panggilan API.",
+                "operationId": "387f7a4c298b484803ea67922e8f78b0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "TglTransaksi",
+                                    "PICID",
+                                    "LokasiID",
+                                    "details"
+                                ],
+                                "properties": {
+                                    "TglTransaksi": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-18"
+                                    },
+                                    "PICID": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "LokasiID": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "details": {
+                                        "description": "Array lengkap dari semua detail. Kirim 'id' untuk item yang sudah ada, jangan kirim 'id' untuk item baru.",
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "description": "ID detail (opsional, hanya untuk update)",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "AssetID": {
+                                                    "type": "integer",
+                                                    "example": 101
+                                                },
+                                                "LineNumber": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "Jumlah": {
+                                                    "type": "integer",
+                                                    "example": 99
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Transaksi berhasil diupdate",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HeaderAssetCount"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi gagal"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            }
+        },
         "/api/reports/assets": {
             "get": {
                 "tags": [
@@ -350,9 +627,6 @@
                                 }
                             }
                         }
-                    },
-                    "404": {
-                        "description": "Settings not found"
                     }
                 },
                 "security": [
@@ -370,61 +644,9 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "multipart/form-data": {
+                        "application/json": {
                             "schema": {
-                                "properties": {
-                                    "NamaPerusahaan": {
-                                        "type": "string",
-                                        "example": "PT. Contoh Jaya"
-                                    },
-                                    "Alamat1": {
-                                        "type": "string",
-                                        "example": "Jl. Jendral Sudirman No. 1"
-                                    },
-                                    "Alamat2": {
-                                        "type": "string",
-                                        "example": "Jakarta Selatan, Indonesia"
-                                    },
-                                    "Email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "info@contohjaya.com"
-                                    },
-                                    "NoTlp": {
-                                        "type": "string",
-                                        "example": "021-12345678"
-                                    },
-                                    "Icon": {
-                                        "type": "string",
-                                        "format": "binary"
-                                    },
-                                    "LabelWidth": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 100.5
-                                    },
-                                    "LabelHeight": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 50.5
-                                    },
-                                    "H1Size": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 24
-                                    },
-                                    "H2Size": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 18
-                                    },
-                                    "PSize": {
-                                        "type": "number",
-                                        "format": "float",
-                                        "example": 12
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/CompanySetting"
                             }
                         }
                     }
@@ -1259,6 +1481,93 @@
                 ]
             }
         },
+        "/api/master-asset/import-bulk": {
+            "post": {
+                "tags": [
+                    "MasterAsset"
+                ],
+                "summary": "Import bulk master asset dari file Excel/CSV",
+                "operationId": "6f0dee234bfd72532de59ecd0dbdef8c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "file": {
+                                        "description": "File Excel (xlsx, xls, csv) yang akan diimport.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Import berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Import bulk asset berhasil."
+                                        },
+                                        "summary": {
+                                            "properties": {
+                                                "total_rows": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "created_assets": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validasi data gagal",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Validasi data gagal."
+                                        },
+                                        "errors": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/lokasi-assets": {
             "get": {
                 "tags": [
@@ -1472,6 +1781,17 @@
                 ],
                 "summary": "List all master assets",
                 "operationId": "39c43e461c9d41dd80a532add4f33345",
+                "parameters": [
+                    {
+                        "name": "GrupAssetID",
+                        "in": "query",
+                        "description": "Filter by Grup Asset ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -1879,6 +2199,36 @@
                     },
                     "404": {
                         "description": "Data not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/lokasi-with-stock/{lokasiID?}": {
+            "get": {
+                "tags": [
+                    "MasterAssets"
+                ],
+                "summary": "Get locations with asset stock, optionally filtered by location ID",
+                "operationId": "93ecff0e65d01da67b32478e9ef28393",
+                "parameters": [
+                    {
+                        "name": "lokasiID",
+                        "in": "path",
+                        "description": "Optional ID of the location to filter by",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
                     }
                 },
                 "security": [
@@ -4183,6 +4533,10 @@
                                                         "format": "email",
                                                         "example": "john.doe@example.com"
                                                     },
+                                                    "UseForMobile": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
                                                     "email_verified_at": {
                                                         "type": "string",
                                                         "format": "date-time"
@@ -4308,6 +4662,11 @@
                                         "format": "password",
                                         "example": "password"
                                     },
+                                    "UseForMobile": {
+                                        "description": "Flag for mobile usage",
+                                        "type": "boolean",
+                                        "example": false
+                                    },
                                     "roles": {
                                         "description": "Array of Role IDs",
                                         "type": "array",
@@ -4349,6 +4708,10 @@
                                             "type": "string",
                                             "format": "email",
                                             "example": "api.user@example.com"
+                                        },
+                                        "UseForMobile": {
+                                            "type": "boolean",
+                                            "example": false
                                         },
                                         "email_verified_at": {
                                             "type": "string",
@@ -4441,6 +4804,10 @@
                                             "format": "email",
                                             "example": "john.doe@example.com"
                                         },
+                                        "UseForMobile": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
                                         "email_verified_at": {
                                             "type": "string",
                                             "format": "date-time"
@@ -4531,6 +4898,11 @@
                                         "format": "password",
                                         "example": "newpassword"
                                     },
+                                    "UseForMobile": {
+                                        "description": "Flag for mobile usage",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
                                     "roles": {
                                         "description": "Array of Role IDs",
                                         "type": "array",
@@ -4572,6 +4944,10 @@
                                             "type": "string",
                                             "format": "email",
                                             "example": "api.user.updated@example.com"
+                                        },
+                                        "UseForMobile": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
                                         "email_verified_at": {
                                             "type": "string",
@@ -4699,8 +5075,9 @@
                         "example": "021-12345678"
                     },
                     "Icon": {
+                        "description": "Base64 encoded image",
                         "type": "string",
-                        "format": "binary"
+                        "format": "byte"
                     },
                     "LabelWidth": {
                         "type": "number",
@@ -4766,6 +5143,49 @@
                         "format": "date-time"
                     },
                     "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "DetailAssetCount": {
+                "title": "Detail Asset Count",
+                "description": "Model untuk detail item pada transaksi penghitungan aset.",
+                "properties": {
+                    "id": {
+                        "description": "ID unik detail",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "header_asset_count_id": {
+                        "description": "ID header terkait",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "AssetID": {
+                        "description": "ID Master Aset",
+                        "type": "integer",
+                        "example": 101
+                    },
+                    "LineNumber": {
+                        "description": "Nomor urut baris",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "Jumlah": {
+                        "description": "Jumlah aset yang dihitung",
+                        "type": "integer",
+                        "example": 50
+                    },
+                    "created_at": {
+                        "description": "Waktu pembuatan record",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Waktu pembaruan record",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -4853,6 +5273,50 @@
                         "format": "date-time"
                     },
                     "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "HeaderAssetCount": {
+                "title": "Header Asset Count",
+                "description": "Model untuk header transaksi penghitungan aset.",
+                "properties": {
+                    "id": {
+                        "description": "ID unik header",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "description": "Nomor unik transaksi",
+                        "type": "string",
+                        "example": "AC/2025/10/001"
+                    },
+                    "TglTransaksi": {
+                        "description": "Tanggal transaksi",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-10-17"
+                    },
+                    "PICID": {
+                        "description": "ID PIC (Employee)",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "LokasiID": {
+                        "description": "ID Lokasi Aset",
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "created_at": {
+                        "description": "Waktu pembuatan record",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Waktu pembaruan record",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -5539,6 +6003,10 @@
     },
     "tags": [
         {
+            "name": "Asset Count",
+            "description": "API untuk transaksi Asset Count"
+        },
+        {
             "name": "Reports",
             "description": "API for generating reports"
         },
@@ -5613,6 +6081,10 @@
         {
             "name": "Grup Asset",
             "description": "Grup Asset"
+        },
+        {
+            "name": "MasterAsset",
+            "description": "MasterAsset"
         },
         {
             "name": "Menus",
