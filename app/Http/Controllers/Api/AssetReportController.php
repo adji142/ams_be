@@ -36,6 +36,13 @@ class AssetReportController extends Controller
      * @OA\Schema(type="integer")
      * ),
      * @OA\Parameter(
+     * name="department_id",
+     * in="query",
+     * description="Filter by department ID",
+     * required=false,
+     * @OA\Schema(type="integer")
+     * ),
+     * @OA\Parameter(
      * name="lokasi_id",
      * in="query",
      * description="Filter by asset location ID",
@@ -67,6 +74,7 @@ class AssetReportController extends Controller
         $request->validate([
             'kondisi'   => 'nullable|string|in:Baik,Repair',
             'lokasi_id' => 'nullable|integer|exists:lokasi_assets,id',
+            'department_id' => 'nullable|integer|exists:departments,id',
         ]);
 
         // Subquery untuk efisiensi (tetap sama)
@@ -135,6 +143,10 @@ class AssetReportController extends Controller
                     ->groupBy('id', 'KodeAsset')
                     ->having(DB::raw('SUM(Jumlah)'), '>', 0);
             });
+        });
+
+        $query->when($request->filled('department_id'), function ($q) use ($request) {
+            return $q->where('dept.id', $request->department_id);
         });
 
         // 4. Eksekusi dan Transformasi Data (tetap sama)

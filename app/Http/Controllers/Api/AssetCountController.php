@@ -77,7 +77,7 @@ class AssetCountController extends Controller
         }
         
         // 4. Eager Loading dan Eksekusi Query
-        $history = $query->with(['pic', 'lokasi'])->get();
+        $history = $query->with(['pic', 'lokasi', 'details.asset'])->get();
 
         return response()->json($history);
     }

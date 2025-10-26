@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AssetLocationHistory;
 use App\Models\MasterAsset;
 use App\Models\PermintaanPerbaikanDetail;
 use Illuminate\Http\Request;
@@ -161,6 +162,100 @@ class DashboardController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data summary perbaikan asset per bulan berhasil diambil.',
+            'data' => $summary
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *      path="/api/dashboard/summary-by-department",
+     *      summary="Get asset summary by department",
+     *      tags={"Dashboard"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(property="success", type="boolean", example=true),
+     *              @OA\Property(property="message", type="string", example="Data summary asset per departemen berhasil diambil."),
+     *              @OA\Property(
+     *                  property="data",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      type="object",
+     *                      @OA\Property(property="namadept", type="string", example="IT"),
+     *                      @OA\Property(property="total_asset", type="integer", example=50)
+     *                  )
+     *              )
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      )
+     * )
+     */
+    public function getAssetSummaryByDepartment()
+    {
+        $summary = MasterAsset::query()
+            ->join('employees', 'master_assets.PIC', '=', 'employees.id')
+            ->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->select('departments.name as namadept', DB::raw('SUM(master_assets.Jumlah) as total_asset'))
+            ->groupBy('departments.name')
+            ->orderBy('departments.name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data summary asset per departemen berhasil diambil.',
+            'data' => $summary
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *      path="/api/dashboard/summary-by-location",
+     *      summary="Get asset summary by location",
+     *      tags={"Dashboard"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(property="success", type="boolean", example=true),
+     *              @OA\Property(property="message", type="string", example="Data summary asset per lokasi berhasil diambil."),
+     *              @OA\Property(
+     *                  property="data",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      type="object",
+     *                      @OA\Property(property="namalokasi", type="string", example="Gudang"),
+     *                      @OA\Property(property="total_asset", type="integer", example=50)
+     *                  )
+     *              )
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      )
+     * )
+     */
+    public function getAssetSummaryByLocation()
+    {
+        $summary = AssetLocationHistory::query()
+            ->join('lokasi_assets', 'asset_location_histories.KodeLokasi', '=', 'lokasi_assets.kode_lokasi')
+            ->select('lokasi_assets.nama_lokasi as namalokasi', DB::raw('SUM(asset_location_histories.Jumlah) as total_asset'))
+            ->groupBy('lokasi_assets.nama_lokasi')
+            ->havingRaw('SUM(asset_location_histories.Jumlah) > 0')
+            ->orderBy('lokasi_assets.nama_lokasi')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data summary asset per lokasi berhasil diambil.',
             'data' => $summary
         ]);
     }

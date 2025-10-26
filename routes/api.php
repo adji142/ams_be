@@ -101,6 +101,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/summary', [App\Http\Controllers\Api\DashboardController::class, 'getAssetSummary']);
     Route::get('/dashboard/summary-by-group', [App\Http\Controllers\Api\DashboardController::class, 'getSummaryByGroup']);
     Route::get('/dashboard/repair-summary-by-month', [App\Http\Controllers\Api\DashboardController::class, 'getRepairSummaryByMonth']);
+    Route::get('/dashboard/summary-by-department', [App\Http\Controllers\Api\DashboardController::class, 'getAssetSummaryByDepartment']);
+    Route::get('/dashboard/summary-by-location', [App\Http\Controllers\Api\DashboardController::class, 'getAssetSummaryByLocation']);
 
     // Company Settings
     Route::apiResource('company-settings', CompanySettingController::class);
