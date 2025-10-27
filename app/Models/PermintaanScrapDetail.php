@@ -40,4 +40,13 @@ class PermintaanScrapDetail extends Model
     {
         return $this->belongsTo(PermintaanScrapHeader::class, 'NoTransaksi', 'NoTransaksi');
     }
+
+    /**
+     * Relasi many-to-one ke MasterLokasi.
+     */
+    public function lokasi()
+    {
+        // Pastikan nama model LokasiAsset sudah benar
+        return $this->belongsTo(LokasiAsset::class, 'KodeLokasi', 'kode_lokasi');
+    }
 }

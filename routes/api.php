@@ -84,6 +84,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Permintaan Scrap
     Route::apiResource('permintaan-scrap', PermintaanScrapController::class);
     Route::patch('permintaan-scrap/{id}/approval', [PermintaanScrapController::class, 'updateApproval']);
+    Route::post('permintaan-scrap/{id}/upload-image', [PermintaanScrapController::class, 'uploadImage']);
+    Route::get('permintaan-scrap/{id}/images', [PermintaanScrapController::class, 'getImages']);
 
     // Mutasi Asset
     Route::apiResource('mutasi-assets', MutasiAssetController::class);

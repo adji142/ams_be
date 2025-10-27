@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\PermintaanScrapImage;
 
 /**
  * @OA\Schema(
@@ -46,6 +47,26 @@ class PermintaanScrapHeader extends Model
         'ApproveBy',
     ];
 
+    protected $appends = ['details_with_images'];
+
+    public function getDetailsWithImagesAttribute()
+    {
+        if ($this->relationLoaded('details') && $this->relationLoaded('images')) {
+            return $this->details->map(function ($detail) {
+                $detail->images = $this->images->map(function ($image) {
+                    return [
+                        'uid' => (string) $image->id,
+                        'name' => 'image-' . $image->id . '.png',
+                        'status' => 'done',
+                        'url' => $image->url,
+                    ];
+                });
+                return $detail;
+            });
+        }
+        return $this->details;
+    }
+
     public function requester()
     {
         return $this->belongsTo(Employee::class, 'Requester', 'id');
@@ -54,5 +75,10 @@ class PermintaanScrapHeader extends Model
     public function details()
     {
         return $this->hasMany(PermintaanScrapDetail::class, 'NoTransaksi', 'NoTransaksi');
+    }
+
+    public function images()
+    {
+        return $this->hasMany(PermintaanScrapImage::class, 'permintaan_scrap_header_id');
     }
 }
