@@ -11,7 +11,11 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
-    protected $fillable = ['name','email','password', 'UseForMobile'];
+    public function employee() {
+        return $this->belongsTo(Employee::class, 'KaryawanID');
+    }
+
+    protected $fillable = ['name','email','password', 'UseForMobile', 'KaryawanID'];
     protected $hidden = ['password','remember_token'];
 
     // relasi

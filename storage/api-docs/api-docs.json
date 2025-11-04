@@ -319,6 +319,15 @@
                         }
                     },
                     {
+                        "name": "department_id",
+                        "in": "query",
+                        "description": "Filter by department ID",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
                         "name": "lokasi_id",
                         "in": "query",
                         "description": "Filter by asset location ID",
@@ -817,6 +826,116 @@
                                                     "total_qty": {
                                                         "type": "integer",
                                                         "example": 15
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/summary-by-department": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get asset summary by department",
+                "operationId": "1ac4a8715e9bf2ab3081ae2c2ca2a594",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data summary asset per departemen berhasil diambil."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "namadept": {
+                                                        "type": "string",
+                                                        "example": "IT"
+                                                    },
+                                                    "total_asset": {
+                                                        "type": "integer",
+                                                        "example": 50
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/dashboard/summary-by-location": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get asset summary by location",
+                "operationId": "92690a1a7226e34857806b5d7e49ce4b",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data summary asset per lokasi berhasil diambil."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "namalokasi": {
+                                                        "type": "string",
+                                                        "example": "Gudang"
+                                                    },
+                                                    "total_asset": {
+                                                        "type": "integer",
+                                                        "example": 50
                                                     }
                                                 },
                                                 "type": "object"
@@ -2706,6 +2825,168 @@
                 }
             }
         },
+        "/api/perintah-stock-count": {
+            "get": {
+                "tags": [
+                    "Perintah Stock Count"
+                ],
+                "summary": "List perintah stock count",
+                "operationId": "1213b0d9b38d1ee9fa41371240941988",
+                "responses": {
+                    "200": {
+                        "description": "List data berhasil diambil"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Perintah Stock Count"
+                ],
+                "summary": "Tambah data perintah stock count",
+                "operationId": "539ea31919af8e034035181a4042f211",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "TglPerintah",
+                                    "PIC",
+                                    "details"
+                                ],
+                                "properties": {
+                                    "TglPerintah": {
+                                        "type": "string",
+                                        "example": "2025-11-02"
+                                    },
+                                    "PIC": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "Keterangan": {
+                                        "type": "string",
+                                        "example": "Stock opname gudang A"
+                                    },
+                                    "details": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/PerintahStockCountDetail"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Data berhasil disimpan"
+                    }
+                }
+            }
+        },
+        "/api/perintah-stock-count/{id}": {
+            "get": {
+                "tags": [
+                    "Perintah Stock Count"
+                ],
+                "summary": "Tampilkan detail perintah stock count",
+                "operationId": "7d0192ecafe993e9c4477ff777116a22",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data ditemukan"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Perintah Stock Count"
+                ],
+                "summary": "Update data perintah stock count",
+                "operationId": "0729e1654fe3fb317a7acf123bc157db",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "TglPerintah": {
+                                        "type": "string",
+                                        "example": "2025-11-05"
+                                    },
+                                    "PIC": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "Keterangan": {
+                                        "type": "string",
+                                        "example": "Revisi stok"
+                                    },
+                                    "details": {
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/PerintahStockCountDetail"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diupdate"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Perintah Stock Count"
+                ],
+                "summary": "Hapus data perintah stock count (soft delete)",
+                "operationId": "4e17bee1a0def29a7dcfcbdb55a9f980",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil dihapus"
+                    }
+                }
+            }
+        },
         "/api/permintaan-assets": {
             "get": {
                 "tags": [
@@ -3340,6 +3621,46 @@
                 "responses": {
                     "200": {
                         "description": "Status approval diperbarui"
+                    }
+                }
+            }
+        },
+        "/api/permintaan-scrap/{id}/upload-image": {
+            "post": {
+                "tags": [
+                    "PermintaanScrap"
+                ],
+                "summary": "Upload gambar base64 untuk Permintaan Scrap",
+                "operationId": "86e613414616cae7e0087cea8f99741f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "image_base64": {
+                                        "description": "Base64 encoded image data",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Gambar berhasil diunggah"
                     }
                 }
             }
@@ -4533,9 +4854,36 @@
                                                         "format": "email",
                                                         "example": "john.doe@example.com"
                                                     },
+                                                    "KaryawanID": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
                                                     "UseForMobile": {
                                                         "type": "boolean",
                                                         "example": false
+                                                    },
+                                                    "employee": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "nama": {
+                                                                "type": "string",
+                                                                "example": "Nama Karyawan"
+                                                            },
+                                                            "nik": {
+                                                                "type": "string",
+                                                                "example": "12345"
+                                                            },
+                                                            "department_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
                                                     },
                                                     "email_verified_at": {
                                                         "type": "string",
@@ -4661,6 +5009,12 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "password"
+                                    },
+                                    "KaryawanID": {
+                                        "description": "ID of the related employee",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     },
                                     "UseForMobile": {
                                         "description": "Flag for mobile usage",
@@ -4804,9 +5158,36 @@
                                             "format": "email",
                                             "example": "john.doe@example.com"
                                         },
+                                        "KaryawanID": {
+                                            "type": "integer",
+                                            "example": 1,
+                                            "nullable": true
+                                        },
                                         "UseForMobile": {
                                             "type": "boolean",
                                             "example": false
+                                        },
+                                        "employee": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "nama": {
+                                                    "type": "string",
+                                                    "example": "Nama Karyawan"
+                                                },
+                                                "nik": {
+                                                    "type": "string",
+                                                    "example": "12345"
+                                                },
+                                                "department_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object",
+                                            "nullable": true
                                         },
                                         "email_verified_at": {
                                             "type": "string",
@@ -4897,6 +5278,12 @@
                                         "type": "string",
                                         "format": "password",
                                         "example": "newpassword"
+                                    },
+                                    "KaryawanID": {
+                                        "description": "ID of the related employee",
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
                                     },
                                     "UseForMobile": {
                                         "description": "Flag for mobile usage",
@@ -5619,6 +6006,70 @@
                 },
                 "type": "object"
             },
+            "PerintahStockCountDetail": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "HeaderID": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KodeAsset": {
+                        "type": "string",
+                        "example": "AST-001"
+                    },
+                    "LineNumber": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "KodeLokasi": {
+                        "type": "string",
+                        "example": "GUD-A"
+                    },
+                    "Jumlah": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 5
+                    }
+                },
+                "type": "object"
+            },
+            "PerintahStockCountHeader": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "NoTransaksi": {
+                        "type": "string",
+                        "example": "PSC-20251102-001"
+                    },
+                    "TglPerintah": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-11-02"
+                    },
+                    "PIC": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "Keterangan": {
+                        "type": "string",
+                        "example": "Stock opname gudang A"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
             "PermintaanAssetDetail": {
                 "title": "Permintaan Asset Detail",
                 "description": "Detail transaksi permintaan asset",
@@ -6037,6 +6488,10 @@
         {
             "name": "MutasiAsset",
             "description": "API untuk Mutasi Asset antar lokasi"
+        },
+        {
+            "name": "Perintah Stock Count",
+            "description": "API untuk mengelola perintah stock count (header + detail)"
         },
         {
             "name": "PermintaanAsset",

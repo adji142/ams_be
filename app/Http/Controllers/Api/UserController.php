@@ -29,9 +29,15 @@ class UserController extends Controller
      *                  type="object",
      *                  @OA\Property(property="id", type="integer", example=1),
      *                  @OA\Property(property="name", type="string", example="John Doe"),
-     *                  @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
-     *                  @OA\Property(property="UseForMobile", type="boolean", example=false),
-     *                  @OA\Property(property="email_verified_at", type="string", format="date-time"),
+      *                  @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+      *                  @OA\Property(property="KaryawanID", type="integer", example=1, nullable=true),
+      *                  @OA\Property(property="UseForMobile", type="boolean", example=false),
+      *                  @OA\Property(property="employee", type="object", nullable=true,
+      *                      @OA\Property(property="id", type="integer", example=1),
+      *                      @OA\Property(property="nama", type="string", example="Nama Karyawan"),
+      *                      @OA\Property(property="nik", type="string", example="12345"),
+      *                      @OA\Property(property="department_id", type="integer", example=1)
+      *                  ),     *                  @OA\Property(property="email_verified_at", type="string", format="date-time"),
      *                  @OA\Property(property="created_at", type="string", format="date-time"),
      *                  @OA\Property(property="updated_at", type="string", format="date-time"),
      *                  @OA\Property(property="roles", type="array", @OA\Items(type="object", @OA\Property(property="id", type="integer"), @OA\Property(property="name", type="string"))),
@@ -51,7 +57,7 @@ class UserController extends Controller
      *      )
      * )
      */
-    public function index() { return User::with(['roles','permissions'])->get(); }
+    public function index() { return User::with(['roles','permissions', 'employee'])->get(); }
 
     /**
      * @OA\Get(
@@ -68,9 +74,15 @@ class UserController extends Controller
      *              type="object",
      *              @OA\Property(property="id", type="integer", example=1),
      *              @OA\Property(property="name", type="string", example="John Doe"),
-     *              @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
-     *              @OA\Property(property="UseForMobile", type="boolean", example=false),
-     *              @OA\Property(property="email_verified_at", type="string", format="date-time"),
+      *              @OA\Property(property="email", type="string", format="email", example="john.doe@example.com"),
+      *              @OA\Property(property="KaryawanID", type="integer", example=1, nullable=true),
+      *              @OA\Property(property="UseForMobile", type="boolean", example=false),
+      *              @OA\Property(property="employee", type="object", nullable=true,
+      *                  @OA\Property(property="id", type="integer", example=1),
+      *                  @OA\Property(property="nama", type="string", example="Nama Karyawan"),
+      *                  @OA\Property(property="nik", type="string", example="12345"),
+      *                  @OA\Property(property="department_id", type="integer", example=1)
+      *              ),     *              @OA\Property(property="email_verified_at", type="string", format="date-time"),
      *              @OA\Property(property="created_at", type="string", format="date-time"),
      *              @OA\Property(property="updated_at", type="string", format="date-time"),
      *              @OA\Property(property="roles", type="array", @OA\Items(type="object", @OA\Property(property="id", type="integer"), @OA\Property(property="name", type="string"))),
@@ -80,7 +92,7 @@ class UserController extends Controller
      *      @OA\Response(response=404, description="User not found")
      * )
      */
-    public function show(User $user) { return $user->load(['roles','permissions']); }
+    public function show(User $user) { return $user->load(['roles','permissions', 'employee']); }
 
     /**
      * @OA\Post(
@@ -97,6 +109,7 @@ class UserController extends Controller
      *              @OA\Property(property="name", type="string", example="Api User"),
      *              @OA\Property(property="email", type="string", format="email", example="api.user@example.com"),
      *              @OA\Property(property="password", type="string", format="password", example="password"),
+     *              @OA\Property(property="KaryawanID", type="integer", example=1, nullable=true, description="ID of the related employee"),
      *              @OA\Property(property="UseForMobile", type="boolean", example=false, description="Flag for mobile usage"),
      *              @OA\Property(property="roles", type="array", @OA\Items(type="integer", example=1), description="Array of Role IDs"),
      *              @OA\Property(property="permissions", type="array", @OA\Items(type="integer", example=1), description="Array of Permission IDs")
@@ -125,7 +138,8 @@ class UserController extends Controller
         $data = $request->validate([
             'name'=>'required|string','email'=>'required|email|unique:users','password'=>'required|string|min:6',
             'roles'=>'array','permissions'=>'array',
-            'UseForMobile' => 'boolean'
+            'UseForMobile' => 'boolean',
+            'KaryawanID' => 'nullable|integer|exists:employees,id'
         ]);
         $data['password'] = bcrypt($data['password']);
         $user = User::create($data);
@@ -149,6 +163,7 @@ class UserController extends Controller
      *              @OA\Property(property="name", type="string", example="Api User Updated"),
      *              @OA\Property(property="email", type="string", format="email", example="api.user.updated@example.com"),
      *              @OA\Property(property="password", type="string", format="password", example="newpassword"),
+     *              @OA\Property(property="KaryawanID", type="integer", example=1, nullable=true, description="ID of the related employee"),
      *              @OA\Property(property="UseForMobile", type="boolean", example=true, description="Flag for mobile usage"),
      *              @OA\Property(property="roles", type="array", @OA\Items(type="integer", example=2), description="Array of Role IDs"),
      *              @OA\Property(property="permissions", type="array", @OA\Items(type="integer", example=3), description="Array of Permission IDs")
@@ -178,7 +193,8 @@ class UserController extends Controller
         $data = $request->validate([
             'name'=>'sometimes|string','email'=>"sometimes|email|unique:users,email,{$user->id}",'password'=>'nullable|string|min:6',
             'roles'=>'array','permissions'=>'array',
-            'UseForMobile' => 'sometimes|boolean'
+            'UseForMobile' => 'sometimes|boolean',
+            'KaryawanID' => 'nullable|integer|exists:employees,id'
         ]);
         if(!empty($data['password'])) $data['password'] = bcrypt($data['password']); else unset($data['password']);
         $user->update($data);

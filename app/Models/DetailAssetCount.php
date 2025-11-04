@@ -31,6 +31,10 @@ class DetailAssetCount extends Model
         'AssetID',
         'LineNumber',
         'Jumlah',
+        'DetailLokasiID',
+        'line_perintah',
+        'kode_asset_perintah',
+        'JumlahTidakValid'
     ];
     
     /**

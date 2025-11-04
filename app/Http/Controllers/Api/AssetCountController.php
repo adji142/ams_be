@@ -8,6 +8,9 @@ use App\Models\DetailAssetCount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\PerintahStockCountHeader;
+use App\Models\PerintahStockCountDetail;
+
 
 /**
  * @OA\Tag(
@@ -17,6 +20,38 @@ use Illuminate\Support\Facades\Validator;
  */
 class AssetCountController extends Controller
 {
+
+    public function indexPending($userId)
+    {
+        // Cara 1: pakai join (efisien jika tabel besar)
+        $data = PerintahStockCountHeader::select('perintah_stock_count_headers.*')
+            ->join('users', 'perintah_stock_count_headers.PIC', '=', 'users.KaryawanID')
+            ->where('users.id', $userId)
+            ->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                      ->from('header_asset_counts')
+                      ->whereRaw('header_asset_counts.perintah_id = perintah_stock_count_headers.id');
+            })
+            ->with('details','pic')
+            ->orderByDesc('perintah_stock_count_headers.id')
+            ->get();
+
+        return response()->json(['status' => 'success', 'data' => $data]);
+    }
+
+    public function start($perintahId)
+    {
+        // Ambil data perintah + detail
+        $perintah = PerintahStockCountHeader::with('details', 'pic','details.asset', 'details.lokasi')->findOrFail($perintahId);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data perintah berhasil dimuat',
+            'data' => $perintah,
+        ]);
+    }
+
+
     /**
      * @OA\Get(
      * path="/api/asset-counts",
@@ -117,10 +152,14 @@ class AssetCountController extends Controller
             'TglTransaksi' => 'required|date',
             'PICID' => 'required|integer|exists:employees,id', // pastikan tabel 'employees' ada
             'LokasiID' => 'required|integer|exists:lokasi_assets,id', // pastikan tabel 'lokasi_assets' ada
+            'perintah_id' => 'nullable|integer|exists:perintah_stock_count_headers,id',
+            'JamMulai' => 'nullable',
+            'JamSelesai' => 'nullable',
             'details' => 'required|array|min:1',
             'details.*.AssetID' => 'required|integer|exists:master_assets,id', // pastikan tabel 'master_assets' ada
             'details.*.LineNumber' => 'required|integer',
             'details.*.Jumlah' => 'required|integer|min:0',
+            'details.*.JumlahTidakValid' => 'nullable|integer|min:0',
         ]);
 
         
@@ -137,12 +176,19 @@ class AssetCountController extends Controller
             'TglTransaksi' => $data['TglTransaksi'],
             'PICID' => $data['PICID'],
             'LokasiID' => $data['LokasiID'] ?? null,
+            'perintah_id' => $data['perintah_id'] ?? null,
+            'JamMulai' => $data['JamMulai'] ?? null,
+            'JamSelesai' => $data['JamSelesai'] ?? null,
         ]);
         foreach ($request->details as $detail) {
             $header->details()->create([
+                'DetailLokasiID' => $detail['DetailLokasiID'],
+                'line_perintah' => $detail['line_perintah'],
+                'kode_asset_perintah' => $detail['kode_asset_perintah'],
                 'AssetID' => $detail['AssetID'],
                 'LineNumber' => $detail['LineNumber'],
                 'Jumlah' => $detail['Jumlah'],
+                'JumlahTidakValid' => $detail['JumlahTidakValid'] ?? 0,
             ]);
         }
         
@@ -208,6 +254,7 @@ class AssetCountController extends Controller
             'details.*.AssetID' => 'required|integer|exists:master_assets,id',
             'details.*.LineNumber' => 'required|integer',
             'details.*.Jumlah' => 'required|integer|min:0',
+            'details.*.JumlahTidakValid' => 'nullable|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -235,6 +282,7 @@ class AssetCountController extends Controller
                         'AssetID' => $detailData['AssetID'],
                         'LineNumber' => $detailData['LineNumber'],
                         'Jumlah' => $detailData['Jumlah'],
+                        'JumlahTidakValid' => $detailData['JumlahTidakValid'] ?? 0,
                     ]
                 );
                 

@@ -156,7 +156,8 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user()->load('employee.department');
+        return response()->json($user);
     }
     public function test(){
         return response()->json(['message' => 'Connection Successfully'], 200);

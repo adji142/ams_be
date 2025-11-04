@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\CompanySettingController;
 use App\Http\Controllers\Api\AssetCountController;
 use App\Http\Controllers\Api\ImportAssetController;
 use App\Http\Controllers\Api\EmployeeImportController;
+use App\Http\Controllers\Api\PerintahStockCountController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -111,8 +112,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Asset Count
     Route::apiResource('asset-counts', AssetCountController::class);
+    Route::get('/asset-count/pending/{picId}', [AssetCountController::class, 'indexPending']);
+    Route::get('/asset-count/start/{perintahId}', [AssetCountController::class, 'start']);
 
     // Import
     Route::post('import-master-assets', [ImportAssetController::class, 'importBulk']);
     Route::post('import-employees', [EmployeeImportController::class, 'import']);
+    // Perintah Stock Count
+    Route::apiResource('perintah-stock-count', PerintahStockCountController::class);
+
 });

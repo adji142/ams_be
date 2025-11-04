@@ -30,6 +30,9 @@ class HeaderAssetCount extends Model
         'TglTransaksi',
         'PICID',
         'LokasiID',
+        'perintah_id',
+        'JamMulai',
+        'JamSelesai'
     ];
 
     /**
@@ -56,5 +59,10 @@ class HeaderAssetCount extends Model
     {
         // Pastikan nama model LokasiAsset sudah benar
         return $this->belongsTo(\App\Models\LokasiAsset::class, 'LokasiID');
+    }
+
+    public function perintah()
+    {
+        return $this->belongsTo(PerintahStockCountHeader::class, 'perintah_id', 'id');
     }
 }

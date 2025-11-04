@@ -90,7 +90,7 @@ class SerahTerimaController extends Controller
     {
         $validated = $request->validate([
             'TglSerahTerima' => 'required|date',
-            'NomorPermintaan' => 'required|string|exists:permintaan_asset_headers,NoTransaksi',
+            'NomorPermintaan' => 'nullable|string|exists:permintaan_asset_headers,NoTransaksi',
             'PenerimaID' => 'required|integer|exists:employees,id',
             'Keterangan' => 'nullable|string|max:255',
             'details' => 'required|array|min:1',
@@ -112,7 +112,7 @@ class SerahTerimaController extends Controller
             $header = SerahTerimaHeader::create([
                 'NoSerahTerima' => $noSerah,
                 'TglSerahTerima' => $validated['TglSerahTerima'],
-                'NomorPermintaan' => $validated['NomorPermintaan'],
+                'NomorPermintaan' => $validated['NomorPermintaan'] ?? "",
                 'PenerimaID' => $validated['PenerimaID'],
                 'Keterangan' => $validated['Keterangan'] ?? null,
                 'DocStatus' => 1,
@@ -120,42 +120,47 @@ class SerahTerimaController extends Controller
 
             // For each detail: validate against permintaan detail accumulative qty
             foreach ($validated['details'] as $d) {
-                // find permintaan detail row
-                $permDetail = PermintaanAssetDetail::where('NoTransaksi', $validated['NomorPermintaan'])
-                    ->where('NoUrut', $d['NoUrutPermintaan'])
-                    ->first();
-
-                if (!$permDetail) {
-                    throw ValidationException::withMessages([
-                        'details' => ["Detail permintaan (NoUrut {$d['NoUrutPermintaan']}) tidak ditemukan."]
-                    ]);
-                }
-
-                $currentReceived = $permDetail->QtySerahTerima ?? 0;
                 $incoming = (float)$d['QtyDiterima'];
-                $maxAllowed = (float)$permDetail->Qty;
+                if (!empty($validated['NomorPermintaan'])) {
+                    // find permintaan detail row
+                    $permDetail = PermintaanAssetDetail::where('NoTransaksi', $validated['NomorPermintaan'])
+                        ->where('NoUrut', $d['NoUrutPermintaan'])
+                        ->first();
 
-                if (($currentReceived + $incoming) > $maxAllowed + 1e-9) {
-                    throw ValidationException::withMessages([
-                        'details' => ["Qty diterima (NoUrut {$d['NoUrutPermintaan']}) melebihi sisa permintaan."]
-                    ]);
+                    if (!$permDetail) {
+                        throw ValidationException::withMessages([
+                            'details' => ["Detail permintaan (NoUrut {$d['NoUrutPermintaan']}) tidak ditemukan."]
+                        ]);
+                    }
+
+                    $currentReceived = $permDetail->QtySerahTerima ?? 0;
+                    
+                    $maxAllowed = (float)$permDetail->Qty;
+
+                    if (($currentReceived + $incoming) > $maxAllowed + 1e-9) {
+                        throw ValidationException::withMessages([
+                            'details' => ["Qty diterima (NoUrut {$d['NoUrutPermintaan']}) melebihi sisa permintaan."]
+                        ]);
+                    }
                 }
 
                 // create serah terima detail
                 $header->details()->create([
                     'NoSerahTerima' => $noSerah,
-                    'NomorPermintaan' => $validated['NomorPermintaan'],
-                    'NoUrutPermintaan' => $d['NoUrutPermintaan'],
+                    'NomorPermintaan' => $validated['NomorPermintaan'] ?? "",
+                    'NoUrutPermintaan' => $d['NoUrutPermintaan'] ?? null,
                     'KodeAsset' => $d['KodeAsset'],
                     'NamaAsset' => $d['NamaAsset'],
                     'KodeLokasi' => $d['KodeLokasi'],
-                    'QtyDiterima' => $incoming,
+                    'QtyDiterima' => $d['QtyDiterima'],
                     'EstimasiHarga' => $d['EstimasiHarga'] ?? 0,
                     'Keterangan' => $d['Keterangan'] ?? null,
                 ]);
 
-                // update permintaan_asset_details QtySerahTerima (increment)
-                $permDetail->increment('QtySerahTerima', $incoming);
+                if (!empty($validated['NomorPermintaan'])) {
+                    // update permintaan_asset_details QtySerahTerima (increment)
+                    $permDetail->increment('QtySerahTerima', $incoming);
+                }
 
                 // update master_asset Jumlah (increment)
                 $this->assetStockService->addStock(
@@ -167,14 +172,16 @@ class SerahTerimaController extends Controller
                 );
             }
 
-            // After inserting all, check if permintaan should be closed
-            $permHeader = PermintaanAssetHeader::with('details')->where('NoTransaksi', $validated['NomorPermintaan'])->first();
-            $allFulfilled = $permHeader->details->every(function ($pd) {
-                return ((float)($pd->QtySerahTerima ?? 0) >= (float)$pd->Qty - 1e-9);
-            });
+            if (!empty($validated['NomorPermintaan'])) {
+                // After inserting all, check if permintaan should be closed
+                $permHeader = PermintaanAssetHeader::with('details')->where('NoTransaksi', $validated['NomorPermintaan'])->first();
+                $allFulfilled = $permHeader->details->every(function ($pd) {
+                    return ((float)($pd->QtySerahTerima ?? 0) >= (float)$pd->Qty - 1e-9);
+                });
 
-            if ($allFulfilled) {
-                $permHeader->update(['DocStatus' => 0]); // Close
+                if ($allFulfilled) {
+                    $permHeader->update(['DocStatus' => 0]); // Close
+                }
             }
 
             return response()->json($header->load(['details', 'permintaan', 'penerima']), 201);
@@ -213,11 +220,11 @@ class SerahTerimaController extends Controller
     {
         $validated = $request->validate([
             'TglSerahTerima' => 'required|date',
-            'NomorPermintaan' => 'required|string|exists:permintaan_asset_headers,NoTransaksi',
+            'NomorPermintaan' => 'nullable|string|exists:permintaan_asset_headers,NoTransaksi',
             'PenerimaID' => 'required|integer|exists:employees,id',
             'Keterangan' => 'nullable|string|max:255',
             'details' => 'required|array|min:1',
-            'details.*.NoUrutPermintaan' => 'required|integer',
+            'details.*.NoUrutPermintaan' => 'nullable|integer',
             'details.*.KodeAsset' => 'required|string',
             'details.*.NamaAsset' => 'required|string',
             'details.*.QtyDiterima' => 'required|numeric|min:0.0',
@@ -227,14 +234,16 @@ class SerahTerimaController extends Controller
         return DB::transaction(function () use ($validated, $id) {
             $header = SerahTerimaHeader::with('details')->findOrFail($id);
 
-            // Revert previous QtyDiterima from permintaan details
-            foreach ($header->details as $old) {
-                $permDetail = PermintaanAssetDetail::where('NoTransaksi', $old->NomorPermintaan)
-                    ->where('NoUrut', $old->NoUrutPermintaan)
-                    ->first();
-                if ($permDetail) {
-                    // subtract previous received
-                    $permDetail->decrement('QtySerahTerima', $old->QtyDiterima);
+            if (!empty($header->NomorPermintaan)) {
+                // Revert previous QtyDiterima from permintaan details
+                foreach ($header->details as $old) {
+                    $permDetail = PermintaanAssetDetail::where('NoTransaksi', $old->NomorPermintaan)
+                        ->where('NoUrut', $old->NoUrutPermintaan)
+                        ->first();
+                    if ($permDetail) {
+                        // subtract previous received
+                        $permDetail->decrement('QtySerahTerima', $old->QtyDiterima);
+                    }
                 }
             }
 
@@ -244,58 +253,64 @@ class SerahTerimaController extends Controller
             // update header fields
             $header->update([
                 'TglSerahTerima' => $validated['TglSerahTerima'],
-                'NomorPermintaan' => $validated['NomorPermintaan'],
+                'NomorPermintaan' => $validated['NomorPermintaan'] ?? "",
                 'PenerimaID' => $validated['PenerimaID'],
                 'Keterangan' => $validated['Keterangan'] ?? null,
             ]);
 
             // process new details with validation against permintaan (after revert)
             foreach ($validated['details'] as $d) {
-                $permDetail = PermintaanAssetDetail::where('NoTransaksi', $validated['NomorPermintaan'])
-                    ->where('NoUrut', $d['NoUrutPermintaan'])
-                    ->first();
+                if (!empty($validated['NomorPermintaan'])) {
+                    $permDetail = PermintaanAssetDetail::where('NoTransaksi', $validated['NomorPermintaan'])
+                        ->where('NoUrut', $d['NoUrutPermintaan'])
+                        ->first();
 
-                if (!$permDetail) {
-                    throw ValidationException::withMessages([
-                        'details' => ["Detail permintaan (NoUrut {$d['NoUrutPermintaan']}) tidak ditemukan."]
-                    ]);
-                }
+                    if (!$permDetail) {
+                        throw ValidationException::withMessages([
+                            'details' => ["Detail permintaan (NoUrut {$d['NoUrutPermintaan']}) tidak ditemukan."]
+                        ]);
+                    }
 
-                $currentReceived = $permDetail->QtySerahTerima ?? 0;
-                $incoming = (float)$d['QtyDiterima'];
-                $maxAllowed = (float)$permDetail->Qty;
+                    $currentReceived = $permDetail->QtySerahTerima ?? 0;
+                    $incoming = (float)$d['QtyDiterima'];
+                    $maxAllowed = (float)$permDetail->Qty;
 
-                if (($currentReceived + $incoming) > $maxAllowed + 1e-9) {
-                    throw ValidationException::withMessages([
-                        'details' => ["Qty diterima (NoUrut {$d['NoUrutPermintaan']}) melebihi sisa permintaan."]
-                    ]);
+                    if (($currentReceived + $incoming) > $maxAllowed + 1e-9) {
+                        throw ValidationException::withMessages([
+                            'details' => ["Qty diterima (NoUrut {$d['NoUrutPermintaan']}) melebihi sisa permintaan."]
+                        ]);
+                    }
                 }
 
                 // insert new detail
                 $header->details()->create([
                     'NoSerahTerima' => $header->NoSerahTerima,
-                    'NomorPermintaan' => $validated['NomorPermintaan'],
-                    'NoUrutPermintaan' => $d['NoUrutPermintaan'],
+                    'NomorPermintaan' => $validated['NomorPermintaan'] ?? "",
+                    'NoUrutPermintaan' => $d['NoUrutPermintaan'] ?? null,
                     'KodeAsset' => $d['KodeAsset'],
                     'NamaAsset' => $d['NamaAsset'],
-                    'QtyDiterima' => $incoming,
+                    'QtyDiterima' => $d['QtyDiterima'],
                     'EstimasiHarga' => $d['EstimasiHarga'] ?? 0,
                     'Keterangan' => $d['Keterangan'] ?? null,
                 ]);
 
-                $permDetail->increment('QtySerahTerima', $incoming);
+                if (!empty($validated['NomorPermintaan'])) {
+                    $permDetail->increment('QtySerahTerima', $d['QtyDiterima']);
+                }
             }
 
-            // After processing, check if permintaan should be closed
-            $permHeader = PermintaanAssetHeader::with('details')->where('NoTransaksi', $validated['NomorPermintaan'])->first();
-            $allFulfilled = $permHeader->details->every(function ($pd) {
-                return ((float)($pd->QtySerahTerima ?? 0) >= (float)$pd->Qty - 1e-9);
-            });
-            if ($allFulfilled) {
-                $permHeader->update(['DocStatus' => 0]); // Close
-            } else {
-                // if not full, ensure open
-                $permHeader->update(['DocStatus' => 1]);
+            if (!empty($validated['NomorPermintaan'])) {
+                // After processing, check if permintaan should be closed
+                $permHeader = PermintaanAssetHeader::with('details')->where('NoTransaksi', $validated['NomorPermintaan'])->first();
+                $allFulfilled = $permHeader->details->every(function ($pd) {
+                    return ((float)($pd->QtySerahTerima ?? 0) >= (float)$pd->Qty - 1e-9);
+                });
+                if ($allFulfilled) {
+                    $permHeader->update(['DocStatus' => 0]); // Close
+                } else {
+                    // if not full, ensure open
+                    $permHeader->update(['DocStatus' => 1]);
+                }
             }
 
             return response()->json($header->load(['details', 'permintaan', 'penerima']));
@@ -317,37 +332,41 @@ class SerahTerimaController extends Controller
         return DB::transaction(function () use ($id) {
             $header = \App\Models\SerahTerimaHeader::with('details')->findOrFail($id);
 
-            // ✅ Revert qty ke permintaan detail
-            foreach ($header->details as $d) {
-                $permDetail = \App\Models\PermintaanAssetDetail::where('NoTransaksi', $d->NomorPermintaan)
-                    ->where('NoUrut', $d->NoUrutPermintaan)
-                    ->first();
-                if ($permDetail) {
-                    $permDetail->decrement('QtySerahTerima', $d->QtyDiterima);
-                }
+            if (!empty($header->NomorPermintaan)) {
+                // ✅ Revert qty ke permintaan detail
+                foreach ($header->details as $d) {
+                    $permDetail = \App\Models\PermintaanAssetDetail::where('NoTransaksi', $d->NomorPermintaan)
+                        ->where('NoUrut', $d->NoUrutPermintaan)
+                        ->first();
+                    if ($permDetail) {
+                        $permDetail->decrement('QtySerahTerima', $d->QtyDiterima);
+                    }
 
-                $this->assetStockService->removeStock(
-                    $d->KodeAsset,
-                    $d->KodeLokasi,
-                    $d->QtyDiterima,
-                    $header->NoSerahTerima,
-                    'SerahTerimaAsset (Delete)'
-                );
+                    $this->assetStockService->removeStock(
+                        $d->KodeAsset,
+                        $d->KodeLokasi,
+                        $d->QtyDiterima,
+                        $header->NoSerahTerima,
+                        'SerahTerimaAsset (Delete)'
+                    );
+                }
             }
 
             // ✅ Soft delete (akan set deleted_at, bukan hapus data)
             $header->delete();
 
-            // ✅ Update DocStatus permintaan (jika masih ada QtySerahTerima < Qty → tetap open)
-            $permHeader = \App\Models\PermintaanAssetHeader::with('details')
-                ->where('NoTransaksi', $header->NomorPermintaan)
-                ->first();
+            if (!empty($header->NomorPermintaan)) {
+                // ✅ Update DocStatus permintaan (jika masih ada QtySerahTerima < Qty → tetap open)
+                $permHeader = \App\Models\PermintaanAssetHeader::with('details')
+                    ->where('NoTransaksi', $header->NomorPermintaan)
+                    ->first();
 
-            if ($permHeader) {
-                $allFulfilled = $permHeader->details->every(function ($pd) {
-                    return ((float)($pd->QtySerahTerima ?? 0) >= (float)$pd->Qty - 1e-9);
-                });
-                $permHeader->update(['DocStatus' => $allFulfilled ? 0 : 1]);
+                if ($permHeader) {
+                    $allFulfilled = $permHeader->details->every(function ($pd) {
+                        return ((float)($pd->QtySerahTerima ?? 0) >= (float)$pd->Qty - 1e-9);
+                    });
+                    $permHeader->update(['DocStatus' => $allFulfilled ? 0 : 1]);
+                }
             }
 
             return response()->json(['message' => 'Serah terima berhasil dihapus (soft delete)']);
