@@ -70,24 +70,22 @@ class AssetReportController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Validasi Input Filter (hanya kondisi dan lokasi)
         $request->validate([
             'kondisi'   => 'nullable|string|in:Baik,Repair',
             'lokasi_id' => 'nullable|integer|exists:lokasi_assets,id',
             'department_id' => 'nullable|integer|exists:departments,id',
         ]);
 
-        // Subquery untuk efisiensi (tetap sama)
         $latestLocationSubquery = DB::table('asset_location_histories')
             ->select('KodeAsset', DB::raw('MAX(id) as last_id'))
+            // ->whereNull('deleted_at')
             ->groupBy('KodeAsset');
 
         $latestPriceSubquery = DB::table('serah_terima_details')
             ->select('KodeAsset', DB::raw('MAX(id) as last_price_id'))
-            ->whereNull('deleted_at')
+            // ->whereNull('deleted_at')
             ->groupBy('KodeAsset');
 
-        // 2. Query Builder Utama (tetap sama)
         $query = MasterAsset::query()
             ->select([
                 'master_assets.*',
@@ -110,37 +108,34 @@ class AssetReportController extends Controller
             })
             ->leftJoin('serah_terima_details as std', 'latest_price_sub.last_price_id', '=', 'std.id');
 
-
-        // 3. (DIUBAH) Logika Filtering Dinamis Sesuai Aturan Baru
+        // Filter kondisi: Repair / Baik
         $query->when($request->filled('kondisi'), function ($q) use ($request) {
-            // Definisikan subquery untuk mencari aset dalam perbaikan yang disetujui
             $subquery = function ($sub) {
                 $sub->select(DB::raw(1))
                     ->from('permintaanperbaikandetail as detail')
-                    ->join('permintaanperbaikanheader as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi') // Sesuaikan foreign key
+                    ->join('permintaanperbaikanheader as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
                     ->whereColumn('detail.KodeAsset', 'master_assets.KodeAsset')
-                    ->whereNull('detail.deleted_at')
+                    // ->whereNull('detail.deleted_at')
                     ->where('header.Approval', 1);
             };
 
-            // Jika kondisi Repair, cari aset YANG ADA di subquery
             if ($request->kondisi === 'Repair') {
                 return $q->whereExists($subquery);
             }
 
-            // Jika kondisi Baik, cari aset YANG TIDAK ADA di subquery
             if ($request->kondisi === 'Baik') {
                 return $q->whereNotExists($subquery);
             }
         });
 
-        // Filter Lokasi (logika ini sudah sesuai dengan permintaan Anda)
+        // Filter lokasi
         $query->when($request->filled('lokasi_id'), function ($q) use ($request) {
-             return $q->whereIn('master_assets.KodeAsset', function ($subquery) use ($request) {
+            return $q->whereIn('master_assets.KodeAsset', function ($subquery) use ($request) {
                 $subquery->select('KodeAsset')
                     ->from('asset_location_histories')
-                    ->where('id', $request->lokasi_id)
-                    ->groupBy('id', 'KodeAsset')
+                    ->where('KodeLokasi', $request->lokasi_id) // 🟢 FIXED
+                    // ->whereNull('deleted_at')
+                    ->groupBy('KodeLokasi', 'KodeAsset')
                     ->having(DB::raw('SUM(Jumlah)'), '>', 0);
             });
         });
@@ -149,10 +144,31 @@ class AssetReportController extends Controller
             return $q->where('dept.id', $request->department_id);
         });
 
-        // 4. Eksekusi dan Transformasi Data (tetap sama)
         $assets = $query->orderBy('master_assets.KodeAsset')->get();
 
-        return $assets->map(function ($asset) {
+        // 🟢 NEW: Cek kondisi per aset
+        $assets = $assets->map(function ($asset) {
+            $isRepair = DB::table('permintaanperbaikandetail as detail')
+                ->join('permintaanperbaikanheader as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
+                ->where('detail.KodeAsset', $asset->KodeAsset)
+                ->where('header.Approval', 1)
+                ->exists();
+
+            $isScrap = DB::table('permintaan_scrap_details as detail')
+                ->join('permintaan_scrap_headers as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
+                ->where('detail.KodeAsset', $asset->KodeAsset)
+                ->where('header.Approval', 1)
+                ->exists();
+
+            $StatusText = 'Unknown';
+            if ($isScrap) {
+                $StatusText = 'Scrap';
+            } elseif ($isRepair) {
+                $StatusText = 'Repair';
+            } else {
+                $StatusText = 'Baik';
+            }
+
             return [
                 'id'             => $asset->id,
                 'NoAsset'        => $asset->KodeAsset,
@@ -162,8 +178,11 @@ class AssetReportController extends Controller
                 'PIC'            => $asset->pic_name ?? '-',
                 'Departemen'     => $asset->department_name ?? '-',
                 'Lokasi'         => $asset->location_name ?? 'Belum ada lokasi',
-                'StatusAsset'    => $asset->status_name ?? '-',
+                // 🟢 NEW: tentukan status dari kondisi
+                'StatusAsset'    => $StatusText,
             ];
         });
+
+        return $assets;
     }
 }

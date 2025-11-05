@@ -39,10 +39,18 @@ class PermintaanPerbaikanController extends Controller
 
         $data->each(function ($row) {
             $row->StatusText = match ($row->DocStatus) {
-                0 => 'Close',
-                1 => 'Open',
-                99 => 'Batal',
-                default => 'Unknown'
+            "0" => 'Close',
+            "1" => 'Open',
+            "99" => 'Batal',
+            default => 'Unknown'
+            };
+            
+            $row->ApprovalText = match ($row->Approval) {
+            0 => 'Pending',
+            1 => 'Approved',
+            2 => 'Rejected',
+            9 => 'Canceled',
+            default => 'Unknown'
             };
         });
 
