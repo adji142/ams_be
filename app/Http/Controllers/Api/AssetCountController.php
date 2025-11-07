@@ -32,9 +32,18 @@ class AssetCountController extends Controller
                       ->from('header_asset_counts')
                       ->whereRaw('header_asset_counts.perintah_id = perintah_stock_count_headers.id');
             })
-            ->with('details','pic')
+            ->with('details', 'pic', 'details.asset', 'details.lokasi')
             ->orderByDesc('perintah_stock_count_headers.id')
             ->get();
+
+        foreach ($data as $header) {
+            foreach ($header->details as $detail) {
+                $stock = \App\Models\AssetLocationHistory::where('KodeAsset', $detail->KodeAsset)
+                    ->where('KodeLokasi', $detail->KodeLokasi)
+                    ->first();
+                $detail->stock = $stock ? $stock->Jumlah : 0;
+            }
+        }
 
         return response()->json(['status' => 'success', 'data' => $data]);
     }
@@ -42,7 +51,7 @@ class AssetCountController extends Controller
     public function start($perintahId)
     {
         // Ambil data perintah + detail
-        $perintah = PerintahStockCountHeader::with('details', 'pic','details.asset', 'details.lokasi')->findOrFail($perintahId);
+        $perintah = PerintahStockCountHeader::with('details', 'pic','details.asset', 'details.lokasi','details.asset')->findOrFail($perintahId);
 
         return response()->json([
             'status' => 'success',
