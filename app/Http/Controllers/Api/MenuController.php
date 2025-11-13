@@ -45,23 +45,45 @@ class MenuController extends Controller
 
         $menus = Menu::with(['children.permission'])
             ->whereNull('parent_id')
-            ->orderBy('order')
+            ->orderBy('order','desc')
             ->get()
             ->filter(function ($menu) use ($userPermissions) {
+                // var_dump($menu->name . ' ' . in_array($menu->permission->name, $userPermissions) . ' '. json_encode($userPermissions));
                 return !$menu->permission_id || in_array($menu->permission->name, $userPermissions);
             })
             ->map(function ($menu) use ($userPermissions) {
-                $menu->children = $menu->children
+                // Sort anak-anak berdasarkan order numerik
+                $filteredChildren  = $menu->children = $menu->children
                     ->filter(function ($child) use ($userPermissions) {
+                        // var_dump('Checking child menu: ' . $child->name . ' with permission_id: ' . $child->permission_id. ' and permission name: ' . ($child->permission ? $child->permission->name : 'N/A'));
                         return !$child->permission_id || in_array($child->permission->name, $userPermissions);
                     })
+                    ->sortBy(function ($child) {
+                        return (float) $child->order; // pastikan numerik
+                    })
                     ->values();
+
+                // Konversi order ke float supaya tampil rapi
+                // var_dump(json_encode($filteredChildren));
+                $menu->order = (float) $menu->order;
+                $menu->children->transform(function ($child) {
+                    $child->order = (float) $child->order;
+                    return $child;
+                });
+
+                $menu->setRelation('children', $filteredChildren);
                 return $menu;
+            })
+            ->sortBy(function ($menu) {
+                return (float) $menu->order; // urut parent numerik juga
             })
             ->values();
 
         return response()->json($menus);
     }
+
+
+
 
     /**
      * @OA\Post(

@@ -81,4 +81,14 @@ class PermintaanScrapHeader extends Model
     {
         return $this->hasMany(PermintaanScrapImage::class, 'permintaan_scrap_header_id');
     }
+    public function approvals()
+    {
+        return $this->hasMany(PermintaanScrapApproval::class, 'NoTransaksi', 'NoTransaksi');
+    }
+    public function lastApproval()
+    {
+        return $this->hasOne(PermintaanScrapApproval::class, 'NoTransaksi', 'NoTransaksi')
+                    ->latestOfMany('ApprovedAt');
+    }
+
 }

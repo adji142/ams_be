@@ -3431,6 +3431,120 @@
                 }
             }
         },
+        "/api/permintaan-scrap-approval/{id}/approve": {
+            "post": {
+                "tags": [
+                    "Permintaan Scrap Approval"
+                ],
+                "summary": "Approve permintaan scrap (menambah log approval baru)",
+                "description": "Menambahkan baris approval baru dan memperbarui status header permintaan scrap",
+                "operationId": "c556f116c6c78119d41fd1bba0fa8808",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID data approval yang sedang diproses (untuk referensi)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "NoTransaksi": {
+                                        "type": "string",
+                                        "example": "PSC-20251107-002"
+                                    },
+                                    "Level": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "ApproverID": {
+                                        "type": "integer",
+                                        "example": 8
+                                    },
+                                    "Keterangan": {
+                                        "type": "string",
+                                        "example": "Disetujui oleh supervisor"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Approval berhasil disimpan dan header diperbarui"
+                    },
+                    "404": {
+                        "description": "Data header tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/permintaan-scrap-approval/{id}/reject": {
+            "post": {
+                "tags": [
+                    "Permintaan Scrap Approval"
+                ],
+                "summary": "Reject permintaan scrap (menambah log reject baru)",
+                "description": "Menambahkan baris approval baru dengan status reject dan memperbarui status header permintaan scrap",
+                "operationId": "bd684709f46a6ca9eb3a6802506e9994",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID data approval yang sedang diproses (untuk referensi)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "NoTransaksi": {
+                                        "type": "string",
+                                        "example": "PSC-20251107-002"
+                                    },
+                                    "Level": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "ApproverID": {
+                                        "type": "integer",
+                                        "example": 8
+                                    },
+                                    "Keterangan": {
+                                        "type": "string",
+                                        "example": "Dokumen tidak lengkap"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reject berhasil disimpan dan header diperbarui"
+                    },
+                    "404": {
+                        "description": "Data header tidak ditemukan"
+                    }
+                }
+            }
+        },
         "/api/permintaan-scrap": {
             "get": {
                 "tags": [
@@ -6500,6 +6614,10 @@
         {
             "name": "PermintaanPerbaikanAsset",
             "description": "API untuk permintaan perbaikan asset"
+        },
+        {
+            "name": "Permintaan Scrap Approval",
+            "description": "API untuk proses approval dan reject permintaan scrap"
         },
         {
             "name": "PermintaanScrap",

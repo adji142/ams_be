@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\AssetCountController;
 use App\Http\Controllers\Api\ImportAssetController;
 use App\Http\Controllers\Api\EmployeeImportController;
 use App\Http\Controllers\Api\PerintahStockCountController;
+use App\Http\Controllers\Api\PermintaanScrapApprovalController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -87,6 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('permintaan-scrap/{id}/approval', [PermintaanScrapController::class, 'updateApproval']);
     Route::post('permintaan-scrap/{id}/upload-image', [PermintaanScrapController::class, 'uploadImage']);
     Route::get('permintaan-scrap/{id}/images', [PermintaanScrapController::class, 'getImages']);
+
+    Route::post('/permintaan-scrap-approval/{id}/approve', [PermintaanScrapApprovalController::class, 'approve']);
+    Route::post('/permintaan-scrap-approval/{id}/reject', [PermintaanScrapApprovalController::class, 'reject']);
 
     // Mutasi Asset
     Route::apiResource('mutasi-assets', MutasiAssetController::class);

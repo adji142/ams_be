@@ -305,9 +305,9 @@ class MasterAssetController extends Controller
             ->havingRaw('SUM(asset_location_histories.Jumlah) > 0')
             ->get();
 
-        if ($stockData->isEmpty()) {
-            return response()->json(['message' => 'Stock not found for this asset'], 404);
-        }
+        // if ($stockData->isEmpty()) {
+        //     return response()->json(['message' => 'Stock not found for this asset'], 404);
+        // }
 
         return response()->json($stockData);
     }

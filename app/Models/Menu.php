@@ -24,7 +24,9 @@ use Illuminate\Database\Eloquent\Model;
 class Menu extends Model
 {
     protected $fillable = ['name','url','icon','permission_id','parent_id','order'];
-
+    protected $casts = [
+        'order' => 'float',
+    ];
     public function permission()
     {
         return $this->belongsTo(Permission::class);
@@ -32,6 +34,10 @@ class Menu extends Model
 
     public function children()
     {
-        return $this->hasMany(Menu::class, 'parent_id')->with('children');
+        return $this->hasMany(Menu::class, 'parent_id')
+            ->with(['children' => function ($query) {
+                $query->orderBy('order'); // recursive sort
+            }])
+            ->orderBy('order'); // urut langsung di query
     }
 }

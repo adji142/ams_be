@@ -34,7 +34,7 @@ class PermintaanScrapController extends Controller
      */
     public function index(Request $request)
     {
-        $query = PermintaanScrapHeader::with(['details.lokasi', 'requester', 'images']);
+        $query = PermintaanScrapHeader::with(['details.lokasi', 'requester', 'images','approvals','approvals.approver', 'lastApproval','lastApproval.approver']);
 
         // 🔹 Filter tanggal
         if ($request->filled('tgl_awal') && $request->filled('tgl_akhir')) {
@@ -51,6 +51,10 @@ class PermintaanScrapController extends Controller
             if (isset($statusMap[strtolower($request->status)])) {
                 $query->where('DocStatus', $statusMap[strtolower($request->status)]);
             }
+        }
+
+        if($request->filled('level_approval')){
+            $query->where('Approval', $request->level_approval);
         }
 
         $data = $query->orderBy('TglTransaksi', 'desc')->get();
@@ -293,6 +297,23 @@ class PermintaanScrapController extends Controller
         ]);
 
         $header = PermintaanScrapHeader::findOrFail($id);
+
+        DB::transaction(function () use ($validated, $id, $request) {
+            $scrap = PermintaanScrapHeader::findOrFail($id);
+            $scrap->Approval = 8; // Set to 'Batal' saat upload gambar
+            $scrap->save();
+
+            $header = PermintaanScrapHeader::with('details')->findOrFail($id);
+            foreach ($header->details as $d) {
+                $this->assetStockService->removeStock(
+                    $d->KodeAsset,
+                    $d->KodeLokasi,
+                    $d->Qty,
+                    $header->NoTransaksi,
+                    'Scrap Asset',
+                );
+            }
+        });
 
         // Remove existing images
         $header->images()->delete();
