@@ -71,7 +71,7 @@ class AssetReportController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'kondisi'   => 'nullable|string|in:Baik,Repair',
+            'kondisi'   => 'nullable|string|in:Baik,Repair,Ex-Repair,Scrap',
             'lokasi_id' => 'nullable|integer|exists:lokasi_assets,id',
             'department_id' => 'nullable|integer|exists:departments,id',
         ]);
@@ -119,12 +119,39 @@ class AssetReportController extends Controller
                     ->where('header.Approval', 1);
             };
 
+            $subexRepair = function ($sub) {
+                $sub->select(DB::raw(1))
+                    ->from('permintaanperbaikandetail as detail')
+                    ->join('permintaanperbaikanheader as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
+                    ->whereColumn('detail.KodeAsset', 'master_assets.KodeAsset')
+                    // ->whereNull('detail.deleted_at')
+                    ->where('header.Approval', "2");
+            };
+
+            $subScap = function ($sub) {
+                $sub->select(DB::raw(1))
+                    ->from('permintaan_scrap_details as detail')
+                    ->join('permintaan_scrap_headers as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
+                    ->whereColumn('detail.KodeAsset', 'master_assets.KodeAsset')
+                    // ->whereNull('detail.deleted_at')
+                    ->where('header.Approval', "8");
+            };
+
             if ($request->kondisi === 'Repair') {
                 return $q->whereExists($subquery);
             }
 
             if ($request->kondisi === 'Baik') {
-                return $q->whereNotExists($subquery);
+                return $q->whereNotExists($subquery)
+                        ->whereNotExists($subexRepair)
+                        ->whereNotExists($subScap);
+            }
+
+            if ($request->kondisi === 'Ex-Repair') {
+                return $q->whereExists($subexRepair);
+            }
+            if ($request->kondisi === 'Scrap') {
+                return $q->whereExists($subScap);
             }
         });
 
@@ -151,13 +178,19 @@ class AssetReportController extends Controller
             $isRepair = DB::table('permintaanperbaikandetail as detail')
                 ->join('permintaanperbaikanheader as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
                 ->where('detail.KodeAsset', $asset->KodeAsset)
-                ->where('header.Approval', 1)
+                ->where('header.Approval', "1")
+                ->exists();
+
+            $isexRepair = DB::table('permintaanperbaikandetail as detail')
+                ->join('permintaanperbaikanheader as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
+                ->where('detail.KodeAsset', $asset->KodeAsset)
+                ->where('header.Approval', "2")
                 ->exists();
 
             $isScrap = DB::table('permintaan_scrap_details as detail')
                 ->join('permintaan_scrap_headers as header', 'detail.NoTransaksi', '=', 'header.NoTransaksi')
                 ->where('detail.KodeAsset', $asset->KodeAsset)
-                ->where('header.Approval', 1)
+                ->where('header.Approval', "8")
                 ->exists();
 
             $StatusText = 'Unknown';
@@ -165,7 +198,11 @@ class AssetReportController extends Controller
                 $StatusText = 'Scrap';
             } elseif ($isRepair) {
                 $StatusText = 'Repair';
-            } else {
+            }
+            elseif ($isexRepair) {
+                $StatusText = 'Ex-Repair';
+            } 
+            else {
                 $StatusText = 'Baik';
             }
 

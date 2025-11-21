@@ -144,7 +144,7 @@ class PermintaanScrapController extends Controller
      */
     public function show($id)
     {
-        $data = PermintaanScrapHeader::with(['details.lokasi', 'requester', 'images'])->findOrFail($id);
+        $data = PermintaanScrapHeader::with(['details.lokasi', 'requester', 'images','approvals', 'approvals.approver'])->findOrFail($id);
         $data->StatusText = match ($data->DocStatus) {
             0 => 'Close',
             1 => 'Open',

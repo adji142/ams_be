@@ -200,7 +200,7 @@ class SerahTerimaController extends Controller
      */
     public function show($id)
     {
-        $header = SerahTerimaHeader::with(['details', 'permintaan', 'penerima'])->findOrFail($id);
+        $header = SerahTerimaHeader::with(['details', 'permintaan', 'penerima','details.lokasi'])->findOrFail($id);
         return response()->json($header);
     }
 

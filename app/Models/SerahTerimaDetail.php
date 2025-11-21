@@ -59,4 +59,12 @@ class SerahTerimaDetail extends Model
         return $this->hasOne(\App\Models\PermintaanAssetDetail::class, 'NoUrut', 'NoUrutPermintaan')
             ->whereColumn('permintaan_asset_details.NoTransaksi', 'serah_terima_details.NomorPermintaan');
     }
+    /**
+     * Relasi many-to-one ke MasterLokasi.
+     */
+    public function lokasi()
+    {
+        // Pastikan nama model LokasiAsset sudah benar
+        return $this->belongsTo(LokasiAsset::class, 'KodeLokasi', 'kode_lokasi');
+    }
 }
