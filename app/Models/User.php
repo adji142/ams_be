@@ -15,6 +15,10 @@ class User extends Authenticatable
         return $this->belongsTo(Employee::class, 'KaryawanID');
     }
 
+    public function employeeuser() {
+        return $this->hasOne(Employee::class, 'id','KaryawanID');
+    }
+
     protected $fillable = ['name','email','password', 'UseForMobile', 'KaryawanID'];
     protected $hidden = ['password','remember_token'];
 

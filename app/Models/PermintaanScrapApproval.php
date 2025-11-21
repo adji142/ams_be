@@ -29,7 +29,27 @@ class PermintaanScrapApproval extends Model
      */
     public function approver()
     {
-        return $this->belongsTo(Employee::class, 'ApproverID');
+        return $this->belongsTo(Employee::class, 'ApproverID','id')->with('user');
+    }
+    public function getApproverUserAttribute()
+    {
+        return \DB::table('users')
+            ->join('employees', 'users.KaryawanID', '=', 'employees.id')
+            ->where('employees.id', $this->ApproverID)
+            ->select('users.*')
+            ->first();
+    }
+
+    public function approverUser()
+    {
+        return $this->hasOneThrough(
+            User::class,        // model akhir
+            Employee::class,    // model perantara
+            'id',               // employee.id (local key)
+            'KaryawanID',       // users.KaryawanID
+            'ApproverID',       // approval.ApproverID
+            'id'                // employee.id
+        );
     }
 
     /**

@@ -36,4 +36,8 @@ class Employee extends Model
     {
         return $this->hasMany(MasterAsset::class, 'PIC');
     }
+    public function user()
+    {
+        return $this->hasOne(User::class,'id','KaryawanID');
+    }
 }
