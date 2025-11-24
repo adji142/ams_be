@@ -103,6 +103,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reporting
     Route::get('/reports/assets', [AssetReportController::class, 'index']);
+    Route::get('/reports/stock-opname', [AssetReportController::class, 'StockOpnameReport']);
 
     // Dashboard
     Route::get('/dashboard/summary', [App\Http\Controllers\Api\DashboardController::class, 'getAssetSummary']);

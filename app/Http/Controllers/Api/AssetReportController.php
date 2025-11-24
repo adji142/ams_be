@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\MasterAsset; // Sesuaikan dengan path model Anda
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 /**
  * @OA\Tag(
@@ -86,6 +87,13 @@ class AssetReportController extends Controller
             // ->whereNull('deleted_at')
             ->groupBy('KodeAsset');
 
+        $latestStockOpnameSubquery = DB::table('detail_asset_counts as detail')
+            ->select('detail.AssetID', DB::raw('MAX(header.TglTransaksi) as latest_so_date'))
+            ->join('header_asset_counts as header', 'detail.header_asset_count_id', '=', 'header.id')
+            // ->whereNull('detail.deleted_at')
+            // ->whereNull('header.deleted_at')
+            ->groupBy('detail.AssetID');
+
         $query = MasterAsset::query()
             ->select([
                 'master_assets.*',
@@ -93,7 +101,8 @@ class AssetReportController extends Controller
                 'dept.name as department_name',
                 'stat.NamaStatusAsset as status_name',
                 'loc.nama_lokasi as location_name',
-                'std.EstimasiHarga as last_price'
+                'std.EstimasiHarga as last_price',
+                'latest_so.latest_so_date'
             ])
             ->leftJoin('employees as pic', 'master_assets.PIC', '=', 'pic.id')
             ->leftJoin('departments as dept', 'pic.department_id', '=', 'dept.id')
@@ -106,7 +115,10 @@ class AssetReportController extends Controller
             ->leftJoinSub($latestPriceSubquery, 'latest_price_sub', function ($join) {
                 $join->on('master_assets.KodeAsset', '=', 'latest_price_sub.KodeAsset');
             })
-            ->leftJoin('serah_terima_details as std', 'latest_price_sub.last_price_id', '=', 'std.id');
+            ->leftJoin('serah_terima_details as std', 'latest_price_sub.last_price_id', '=', 'std.id')
+            ->leftJoinSub($latestStockOpnameSubquery, 'latest_so', function ($join) {
+                $join->on('master_assets.id', '=', 'latest_so.AssetID');
+            });
 
         // Filter kondisi: Repair / Baik
         $query->when($request->filled('kondisi'), function ($q) use ($request) {
@@ -217,9 +229,108 @@ class AssetReportController extends Controller
                 'Lokasi'         => $asset->location_name ?? 'Belum ada lokasi',
                 // 🟢 NEW: tentukan status dari kondisi
                 'StatusAsset'    => $StatusText,
+                'TglStockOpname' => $asset->latest_so_date ? Carbon::parse($asset->latest_so_date)->format('Y-m-d') : '-',
             ];
         });
 
         return $assets;
+    }
+
+    /**
+     * @OA\Get(
+     *      path="/api/reports/stock-opname",
+     *      summary="Get a report of stock opname",
+     *      tags={"Reports"},
+     *      security={{"bearerAuth":{}}},
+     *      @OA\Parameter(
+     *          name="TglAwal",
+     *          in="query",
+     *          description="Start date for stock opname report (mandatory)",
+     *          required=true,
+     *          @OA\Schema(type="string", format="date", example="2025-10-01")
+     *      ),
+     *      @OA\Parameter(
+     *          name="TglAkhir",
+     *          in="query",
+     *          description="End date for stock opname report (mandatory)",
+     *          required=true,
+     *          @OA\Schema(type="string", format="date", example="2025-10-31")
+     *      ),
+     *      @OA\Parameter(
+     *          name="PIC",
+     *          in="query",
+     *          description="Filter by PIC (Employee ID) from perintah_stock_count_headers",
+     *          required=false,
+     *          @OA\Schema(type="integer")
+     *      ),
+     *      @OA\Parameter(
+     *          name="NomorPerintah",
+     *          in="query",
+     *          description="Filter by NomorPerintah (NoTransaksi) from perintah_stock_count_headers",
+     *          required=false,
+     *          @OA\Schema(type="string")
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(
+     *              type="array",
+     *              @OA\Items(
+     *                  @OA\Property(property="NoTransaksi", type="string", example="SO-001"),
+     *                  @OA\Property(property="TglTransaksi", type="string", format="date", example="2025-11-24"),
+     *                  @OA\Property(property="KodeAsset", type="string", example="AST-001"),
+     *                  @OA\Property(property="NamaAsset", type="string", example="Laptop Dell"),
+     *                  @OA\Property(property="Status", type="string", example="valid")
+     *              )
+     *          )
+     *      )
+     * )
+     */
+    public function StockOpnameReport(Request $request)
+    {
+        $request->validate([
+            'TglAwal'       => 'required|date',
+            'TglAkhir'      => 'required|date|after_or_equal:TglAwal',
+            'PIC'           => 'nullable|integer|exists:employees,id',
+            'NomorPerintah' => 'nullable|string',
+        ]);
+
+        $query = DB::table('perintah_stock_count_headers as psc_header')
+            ->join('perintah_stock_count_details as psc_detail', 'psc_header.id', '=', 'psc_detail.HeaderID')
+            ->join('master_assets', 'psc_detail.KodeAsset', '=', 'master_assets.KodeAsset')
+            ->leftJoin('header_asset_counts as hac', 'psc_header.id', '=', 'hac.perintah_id')
+            ->leftJoin('detail_asset_counts as dac', function($join) {
+                $join->on('hac.id', '=', 'dac.header_asset_count_id')
+                     ->on('psc_detail.LineNumber', '=', 'dac.line_perintah')
+                     ->on('psc_detail.KodeAsset', '=', 'dac.kode_asset_perintah');
+            })
+            ->leftJoin('employees as pic', 'psc_header.PIC', '=', 'pic.id')
+            ->select(
+                'psc_header.NoTransaksi',
+                'psc_header.TglPerintah',
+                'master_assets.KodeAsset',
+                'master_assets.NamaAsset',
+                'pic.name as PICName',
+                DB::raw("CASE 
+                            WHEN dac.Jumlah > 0 THEN 'valid'
+                            WHEN dac.JumlahTidakValid > 0 THEN 'tidak valid'
+                            ELSE 'belom scan'
+                         END as Status")
+            );
+
+        // Apply filters
+        $query->whereBetween('psc_header.TglPerintah', [$request->TglAwal, $request->TglAkhir]);
+
+        $query->when($request->filled('PIC'), function ($q) use ($request) {
+            return $q->where('psc_header.PIC', $request->PIC);
+        });
+
+        $query->when($request->filled('NomorPerintah'), function ($q) use ($request) {
+            return $q->where('psc_header.NoTransaksi', 'like', '%' . $request->NomorPerintah . '%');
+        });
+
+        $data = $query->get();
+
+        return response()->json($data);
     }
 }
