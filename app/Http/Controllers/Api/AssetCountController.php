@@ -26,7 +26,7 @@ class AssetCountController extends Controller
         // Cara 1: pakai join (efisien jika tabel besar)
         $data = PerintahStockCountHeader::select('perintah_stock_count_headers.*')
             ->join('users', 'perintah_stock_count_headers.PIC', '=', 'users.KaryawanID')
-            ->where('users.KaryawanID', $userId)
+            ->where('users.id', $userId)
             ->whereNotExists(function ($query) {
                 $query->select(DB::raw(1))
                       ->from('header_asset_counts')
