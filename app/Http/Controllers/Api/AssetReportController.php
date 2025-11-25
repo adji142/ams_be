@@ -317,7 +317,9 @@ class AssetReportController extends Controller
                             ELSE 'belom scan'
                          END as Status")
             );
-
+        $query->whereNull('deleted_at');
+        $query->whereNull('psc_header.deleted_at');
+        
         // Apply filters
         $query->whereBetween('psc_header.TglPerintah', [$request->TglAwal, $request->TglAkhir]);
 
