@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\MasterAsset;
-
+use Illuminate\Support\Facades\DB;
 /**
  * @OA\Tag(
  *     name="MasterAssets",
@@ -368,4 +368,19 @@ class MasterAssetController extends Controller
 
         return response()->json(array_values($locations));
     }
+
+    public function getMutasiDataAsset(Request $request, $kodeAsset)
+    {
+        $tglAwal = $request->TglAwal ?? now()->firstOfMonth()->format('Y-m-d');
+        $tglAkhir = $request->TglAkhir ?? now()->format('Y-m-d');
+        
+        $result = DB::select('CALL rsp_HistoryAsset(?, ?, ?)', [$kodeAsset, $tglAwal, $tglAkhir]);
+
+        // if ($stockData->isEmpty()) {
+        //     return response()->json(['message' => 'Stock not found for this asset'], 404);
+        // }
+
+        return response()->json($result);
+    }
+
 }

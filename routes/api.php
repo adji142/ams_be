@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\ImportAssetController;
 use App\Http\Controllers\Api\EmployeeImportController;
 use App\Http\Controllers\Api\PerintahStockCountController;
 use App\Http\Controllers\Api\PermintaanScrapApprovalController;
+use App\Http\Controllers\Api\MutasiAssetPICController;
 
 Route::post('/register', [AuthController::class,'register']);
 Route::post('/login', [AuthController::class,'login']);
@@ -72,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('master-assets/{asset_id}/images/{image_id}', [MasterAssetController::class, 'deleteImage']);
     Route::get('master-assets/{kodeAsset}/location-stock-summary', [MasterAssetController::class, 'getLocationStockSummary']);
     Route::get('lokasi-with-stock/{lokasiID?}', [MasterAssetController::class, 'getLokasiWithStock']);
+    Route::get('histori-mutasi-asset/{kodeAsset}', [MasterAssetController::class, 'getMutasiDataAsset']);
 
 
     // Master Status Asset
@@ -129,4 +131,5 @@ Route::middleware('auth:sanctum')->group(function () {
     // Perintah Stock Count
     Route::apiResource('perintah-stock-count', PerintahStockCountController::class);
 
+    Route::post('/mutasi-pic', [MutasiAssetPICController::class, 'store']);
 });

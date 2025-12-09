@@ -8,6 +8,7 @@ use App\Models\MutasiAssetHeader;
 use App\Models\MutasiAssetDetail;
 use Illuminate\Support\Facades\DB;
 use App\Services\AssetStockService;
+use App\Models\MasterAsset;
 
 /**
  * @OA\Tag(name="MutasiAsset", description="API untuk Mutasi Asset antar lokasi")
@@ -31,7 +32,7 @@ class MutasiAssetController extends Controller
      */
     public function index(Request $request)
     {
-        $query = MutasiAssetHeader::with('details');
+        $query = MutasiAssetHeader::with('details', 'picLama', 'picBaru');
 
         if ($request->filled('tglawal') && $request->filled('tglakhir')) {
             $query->whereBetween('TglTransaksi', [$request->tglawal, $request->tglakhir]);
@@ -73,6 +74,8 @@ class MutasiAssetController extends Controller
             $validated = $request->validate([
                 'TglTransaksi' => 'required|date',
                 'Keterangan' => 'nullable|string',
+                'PIC_Lama' => 'nullable|string',
+                'PIC_Baru' => 'nullable|string',
                 'details' => 'required|array|min:1',
                 'details.*.KodeAsset' => 'required|string',
                 'details.*.NamaAsset' => 'required|string',
@@ -89,6 +92,8 @@ class MutasiAssetController extends Controller
                 'TglTransaksi' => $validated['TglTransaksi'],
                 'DocStatus' => 1,
                 'Keterangan' => $validated['Keterangan'] ?? null,
+                'PIC_Lama' => $validated['PIC_Lama'] ?? null,
+                'PIC_Baru' => $validated['PIC_Baru'] ?? null,
             ]);
 
             foreach ($validated['details'] as $i => $d) {
@@ -118,6 +123,10 @@ class MutasiAssetController extends Controller
                     $header->NoTransaksi,
                     'MutasiAsset (Masuk)'
                 );
+                // 🔹 Update PIC di MasterAsset
+                MasterAsset::where('KodeAsset', $d['KodeAsset'])
+                ->update(['PIC' => $validated['PIC_Baru'] ?? null]);
+                
             }
 
             return response()->json([
@@ -165,6 +174,8 @@ class MutasiAssetController extends Controller
             $validated = $request->validate([
                 'TglTransaksi' => 'required|date',
                 'Keterangan' => 'nullable|string',
+                'PIC_Lama' => 'nullable|string',
+                'PIC_Baru' => 'nullable|string',
                 'details' => 'required|array|min:1',
                 'details.*.KodeAsset' => 'required|string',
                 'details.*.NamaAsset' => 'required|string',
@@ -196,6 +207,8 @@ class MutasiAssetController extends Controller
             $header->update([
                 'TglTransaksi' => $validated['TglTransaksi'],
                 'Keterangan' => $validated['Keterangan'] ?? null,
+                'PIC_Lama' => $validated['PIC_Lama'] ?? null,
+                'PIC_Baru' => $validated['PIC_Baru'] ?? null,
             ]);
 
             // 🔹 Hapus detail lama & simpan baru
@@ -228,6 +241,9 @@ class MutasiAssetController extends Controller
                     $header->NoTransaksi,
                     'MutasiAsset (Update - Masuk Baru)'
                 );
+
+                MasterAsset::where('KodeAsset', $d['KodeAsset'])
+                    ->update(['PIC' => $validated['PIC_Baru'] ?? null]);
             }
 
             return response()->json([
