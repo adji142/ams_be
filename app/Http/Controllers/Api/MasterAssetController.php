@@ -36,11 +36,17 @@ class MasterAssetController extends Controller
     public function index(Request $request)
     {
         $grupAssetID = $request->query('GrupAssetID');
+        $departementID = $request->query('DepartmentID');
 
         $query = MasterAsset::with(['employee', 'grupAsset', 'images', 'status']);
 
         if ($grupAssetID) {
             $query->where('GrupAssetID', $grupAssetID);
+        }
+        if ($departementID) {
+            $query->whereHas('employee', function ($q) use ($departementID) {
+                $q->where('department_id', $departementID);
+            });
         }
 
         return $query->orderBy('id', 'desc')->get();
