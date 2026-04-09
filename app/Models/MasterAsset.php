@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  *   @OA\Property(property="UmurPakai", type="integer", example=5),
  *   @OA\Property(property="Keterangan", type="integer", example=1),
  *   @OA\Property(property="Jumlah", type="number", format="double", example=15000000),
+ *   @OA\Property(property="perkiraan_harga", type="number", format="double", example=15000000),
  *   @OA\Property(property="PIC", type="integer", example=3, description="Employee ID as PIC"),
  *   @OA\Property(property="employee", ref="#/components/schemas/Employee"),
  *   @OA\Property(property="GrupAssetID", type="integer", example=2),
@@ -41,6 +42,7 @@ class MasterAsset extends Model
         'UmurPakai',
         'Keterangan',
         'Jumlah',
+        'perkiraan_harga',
         'PIC',
         'StatusID'
     ];

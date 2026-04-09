@@ -78,6 +78,7 @@ class AssetMasterImport implements ToCollection, WithHeadingRow, WithValidation
                     'TglBeli' => Carbon::parse($row['tgl_beli']),
                     'TglKapitalisasi' => Carbon::parse($row['tgl_kapitalisasi']),
                     'UmurPakai' => $row['umur_pakai'],
+                    'perkiraan_harga' => $row['perkiraan_harga'] ?? 0,
                     'Keterangan' => $row['keterangan'],
                     'Jumlah' => 0, // Master asset quantity is managed by stock, not a single field
                     // 'created_by' => $this->userId, // Assuming you have this field
@@ -119,9 +120,9 @@ class AssetMasterImport implements ToCollection, WithHeadingRow, WithValidation
      * Nama-nama ini HARUS SAMA PERSIS dengan header di file Excel.
      * 
      * Contoh header di file Excel:
-     * | kode_asset | nama_asset | kode_grup | tgl_beli   | tgl_kapitalisasi | umur_pakai | keterangan | jumlah | nik_pic | kode_lokasi_asset |
-     * |------------|------------|-----------|------------|------------------|------------|------------|--------|---------|-------------------|
-     * | ASSET-001  | Laptop A   | ELK       | 2023-01-15 | 2023-01-20       | 5          | Pembelian  | 1      | 12345   | GUDANG-JKT        |
+     * | kode_asset | nama_asset | kode_grup | tgl_beli   | tgl_kapitalisasi | umur_pakai | perkiraan_harga | keterangan | jumlah | nik_pic | kode_lokasi_asset |
+     * |------------|------------|-----------|------------|------------------|------------|-----------------|------------|--------|---------|-------------------|
+     * | ASSET-001  | Laptop A   | ELK       | 2023-01-15 | 2023-01-20       | 5          | 1000000         | Pembelian  | 1      | 12345   | GUDANG-JKT        |
      * 
      */
     public function rules(): array
@@ -133,6 +134,7 @@ class AssetMasterImport implements ToCollection, WithHeadingRow, WithValidation
             '*.tgl_beli' => 'required',
             '*.tgl_kapitalisasi' => 'required',
             '*.umur_pakai' => 'required',
+            '*.perkiraan_harga' => 'nullable|numeric',
             '*.jumlah' => 'required|min:1',
             '*.nik_pic' => 'required|exists:employees,nik',
             '*.kode_lokasi_asset' => 'required|exists:lokasi_assets,kode_lokasi',

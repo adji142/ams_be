@@ -94,7 +94,7 @@ class AssetReportController extends Controller
             // ->whereNull('header.deleted_at')
             ->groupBy('detail.AssetID');
 
-        $query = MasterAsset::query()
+        $query = MasterAsset::with('images')
             ->select([
                 'master_assets.*',
                 'pic.name as pic_name',
@@ -222,7 +222,7 @@ class AssetReportController extends Controller
                 'id'             => $asset->id,
                 'NoAsset'        => $asset->KodeAsset,
                 'NamaAsset'      => $asset->NamaAsset,
-                'PerkiraanHarga' => $asset->last_price ?? $asset->HargaBeli,
+                'PerkiraanHarga' => $asset->perkiraan_harga ?? 0,
                 'Jumlah'         => $asset->Jumlah,
                 'PIC'            => $asset->pic_name ?? '-',
                 'Departemen'     => $asset->department_name ?? '-',
@@ -230,6 +230,7 @@ class AssetReportController extends Controller
                 // 🟢 NEW: tentukan status dari kondisi
                 'StatusAsset'    => $StatusText,
                 'TglStockOpname' => $asset->latest_so_date ? Carbon::parse($asset->latest_so_date)->format('Y-m-d') : '-',
+                'images'         => $asset->images,
             ];
         });
 

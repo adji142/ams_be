@@ -69,6 +69,7 @@ class MasterAssetController extends Controller
      *             @OA\Property(property="UmurPakai", type="integer", example=5),
      *             @OA\Property(property="Keterangan", type="integer", example=1),
      *             @OA\Property(property="Jumlah", type="number", format="double", example=15000000),
+     *             @OA\Property(property="perkiraan_harga", type="number", format="double", example=15000000),
      *             @OA\Property(property="PIC", type="integer", example=3, description="Employee ID as PIC")
      *         )
      *     ),
@@ -86,6 +87,7 @@ class MasterAssetController extends Controller
             'UmurPakai'       => 'nullable|integer',
             'Keterangan'      => 'nullable|string|max:255',
             'Jumlah'          => 'required|numeric',
+            'perkiraan_harga' => 'nullable|numeric',
             'PIC'             => 'nullable|integer|exists:employees,id',
             'GrupAssetID' => 'nullable|integer|exists:grup_assets,id',
             'StatusID' => 'nullable|integer|exists:master_status_assets,id',
@@ -139,6 +141,7 @@ class MasterAssetController extends Controller
             'UmurPakai' => 'nullable|integer',
             'Keterangan' => 'nullable|string|max:255',
             'Jumlah' => 'nullable|numeric',
+            'perkiraan_harga' => 'nullable|numeric',
             'PIC' => 'nullable|integer|exists:employees,id',
             'StatusID' => 'nullable|integer|exists:master_status_assets,id',
         ]);
